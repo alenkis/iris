@@ -4,6 +4,7 @@ import           Data.Maybe             (fromMaybe)
 import           GHC.Generics           (Generic)
 import           QuoteStr               (quoteStr)
 
+import           Config.Decode          (Config (..), Field (..), Job (..))
 import           Test.Hspec             (Spec, describe, it, shouldBe)
 import           Toml                   (Result (..), decode, encode)
 import           Toml.FromValue         (FromValue (..), optKey,
@@ -13,71 +14,41 @@ import           Toml.ToValue           (ToTable (..), ToValue (toValue),
                                          defaultTableToValue, table, (.=))
 import           Toml.ToValue.Generic   (genericToTable)
 
-data Job = Job
-    { title  :: String
-    , fields :: [Field]
-    }
-    deriving (Eq, Show, Generic)
-
-newtype Config = Config
-    { job :: Job
-    }
-    deriving (Eq, Show, Generic)
-
-data Field = Field
-    { name   :: String
-    , rename :: String
-    }
-    deriving (Eq, Show, Generic)
-
-instance FromValue Field where fromValue = parseTableFromValue genericParseTable
-instance FromValue Config where fromValue = parseTableFromValue genericParseTable
-instance FromValue Job where fromValue = parseTableFromValue genericParseTable
-
-instance ToValue Config where toValue = defaultTableToValue
-instance ToValue Field where toValue = defaultTableToValue
-instance ToValue Job where toValue = defaultTableToValue
-
-instance ToTable Field where toTable = genericToTable
-instance ToTable Config where toTable = genericToTable
-instance ToTable Job where toTable = genericToTable
-
 spec :: Spec
 spec =
     do
-        let expect =
-                Config
-                    { job =
-                        Job
-                            { title = "TOML Example"
-                            , fields =
-                                [ Field
-                                    { name = "item_group_id"
-                                    , rename = "group_id"
-                                    }
-                                , Field
-                                    { name = "name"
-                                    , rename = "name"
-                                    }
-                                ]
+        let job =
+                Job
+                    { title = "TOML Example"
+                    , groupBy = "item_group_id"
+                    , field =
+                        [ Field
+                            { name = "item_group_id"
+                            , rename = Just "group_id"
                             }
+                        , Field
+                            { name = "name"
+                            , rename = Nothing
+                            }
+                        ]
                     }
+        let expect = Config{job = job}
 
-        let input =
-                [quoteStr|
+        let decodedInput =
+                decode
+                    [quoteStr|
         [job]
         title = "TOML Example"
+        group_by = "item_group_id"
 
-        [[ job.fields ]]
+        [[job.field]]
         name = "item_group_id"
         rename = "group_id"
 
-        [[ job.fields ]]
+        [[job.field]]
         name = "name"
-        rename = "name"
         |]
 
-        describe "simple config" $
-            do
-                it "should fail" $ do
-                    decode input `shouldBe` Success mempty expect
+        describe "simple config" $ do
+            it "should decode successfully" $ do
+                decodedInput `shouldBe` Success mempty expect

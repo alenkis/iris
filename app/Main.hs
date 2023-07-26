@@ -1,4 +1,7 @@
 module Main where
 
+import           Cli (getCliCommand)
+
 main :: IO ()
-main = putStrLn "Hello, Haskell!"
+main = do
+    getCliCommand >>= \result -> print result

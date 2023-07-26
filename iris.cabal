@@ -62,11 +62,17 @@ common spec
         QuasiQoutes
 
 library
+    import:           warnings
+                    , extensions
     hs-source-dirs:   lib
     exposed-modules:  Config.Decode
-    build-depends:    base
+    build-depends:
+            base
+          , toml-parser
+          , optparse-applicative
+          , text
 
-executable app
+executable iris
     -- Import common warning flags.
     import:           warnings
                     , extensions
@@ -75,7 +81,9 @@ executable app
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-    -- other-modules:    Config.Decode
+    other-modules:
+        Cli
+        Paths_iris
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -84,9 +92,11 @@ executable app
     build-depends:    base ^>=4.17.0.0
                     , toml-parser
                     , iris
+                    , text
+                    , optparse-applicative
 
     -- Directories containing source files.
-    hs-source-dirs:   app
+    hs-source-dirs:   app, lib
 
     -- Base language which the package is written in.
     default-language: GHC2021

@@ -1,0 +1,14 @@
+[job]
+title = "Simple Transformation"
+group_by = "item_group_id"
+
+[[job.field]]
+name = "item_group_id"
+rename = "group_id"
+
+[[job.field]]
+name = "name"
+
+[[job.field]]
+name = "price"
+rename = "sale_price"

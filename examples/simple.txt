@@ -1,0 +1,5 @@
+item_group_id,id,name,price
+0,1,apple,1.00
+0,2,orange,2.00
+1,3,shoes,10.00
+1,4,socks,5.00
