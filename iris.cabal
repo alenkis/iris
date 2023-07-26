@@ -66,11 +66,16 @@ library
                     , extensions
     hs-source-dirs:   lib
     exposed-modules:  Config.Decode
+    other-modules:
+        Paths_iris
     build-depends:
             base
           , toml-parser
           , optparse-applicative
           , text
+          , conduit
+          , conduit-extra
+          , csv-conduit
 
 executable iris
     -- Import common warning flags.
@@ -94,6 +99,9 @@ executable iris
                     , iris
                     , text
                     , optparse-applicative
+                    , conduit
+                    , conduit-extra
+                    , csv-conduit
 
     -- Directories containing source files.
     hs-source-dirs:   app, lib
