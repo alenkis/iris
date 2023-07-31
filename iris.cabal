@@ -68,6 +68,7 @@ library
     exposed-modules:  Config.Decode
     other-modules:
         Paths_iris
+        Meta
     build-depends:
             base
           , toml-parser
@@ -76,6 +77,8 @@ library
           , conduit
           , conduit-extra
           , csv-conduit
+          , ordered-containers
+          , bytestring
 
 executable iris
     -- Import common warning flags.
@@ -89,6 +92,8 @@ executable iris
     other-modules:
         Cli
         Paths_iris
+        Csv
+        Meta
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -102,6 +107,8 @@ executable iris
                     , conduit
                     , conduit-extra
                     , csv-conduit
+                    , ordered-containers
+                    , bytestring
 
     -- Directories containing source files.
     hs-source-dirs:   app, lib
@@ -129,7 +136,8 @@ test-suite spec
         template-haskell ^>= {2.16, 2.17, 2.18, 2.19, 2.20},
         time,
         toml-parser,
-        iris
+        iris,
+        text
         
     other-modules:
         QuoteStr,

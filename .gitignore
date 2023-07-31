@@ -27,3 +27,6 @@ cabal.project.local
 cabal.project.local~
 .HTF/
 .ghc.environment.*
+
+examples/*.txt
+examples/output.csv

@@ -1,0 +1,40 @@
+cradle:
+  cabal:
+    - path: "lib"
+      component: "lib:iris"
+
+    - path: "app/Main.hs"
+      component: "iris:exe:iris"
+
+    - path: "lib/Main.hs"
+      component: "iris:exe:iris"
+
+    - path: "app/Cli.hs"
+      component: "iris:exe:iris"
+
+    - path: "app/Paths_iris.hs"
+      component: "iris:exe:iris"
+
+    - path: "app/Csv.hs"
+      component: "iris:exe:iris"
+
+    - path: "app/Meta.hs"
+      component: "iris:exe:iris"
+
+    - path: "lib/Cli.hs"
+      component: "iris:exe:iris"
+
+    - path: "lib/Paths_iris.hs"
+      component: "iris:exe:iris"
+
+    - path: "lib/Csv.hs"
+      component: "iris:exe:iris"
+
+    - path: "lib/Meta.hs"
+      component: "iris:exe:iris"
+
+    - path: "test"
+      component: "iris:test:spec"
+
+    - path: "lib"
+      component: "iris:test:spec"

@@ -1,0 +1,16 @@
+[job]
+title = "SSENSE"
+group_by = "item_group_id"
+
+[[job.field]]
+name = "item_group_id"
+rename = "group_id"
+
+[[job.field]]
+name = "title"
+
+[[job.field]]
+name = "price"
+
+[[job.field]]
+name = "sale_price"

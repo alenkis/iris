@@ -2,6 +2,7 @@ module Config.Decode where
 
 import           GHC.Generics           (Generic)
 
+import           Data.Text              (Text)
 import           Toml.FromValue         (FromValue (..), optKey,
                                          parseTableFromValue, reqKey)
 import           Toml.FromValue.Generic (genericParseTable)
@@ -9,19 +10,19 @@ import           Toml.ToValue           (ToTable (..), ToValue (toValue),
                                          defaultTableToValue)
 import           Toml.ToValue.Generic   (genericToTable)
 
+newtype Config = Config {job :: Job}
+    deriving (Eq, Show, Generic)
+
 data Job = Job
-    { title   :: String
-    , groupBy :: String
+    { title   :: Text
+    , groupBy :: Text
     , field   :: [Field]
     }
     deriving (Eq, Show, Generic)
 
-newtype Config = Config {job :: Job}
-    deriving (Eq, Show, Generic)
-
 data Field = Field
-    { name   :: String
-    , rename :: Maybe String
+    { name   :: Text
+    , rename :: Maybe Text
     }
     deriving (Eq, Show, Generic)
 

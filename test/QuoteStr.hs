@@ -16,7 +16,6 @@ quoteStr =
 processString :: String -> ExpQ
 processString ('\n' : xs) =
     let ws = takeWhile (' ' ==) xs
-
         cleanup "" = pure ""
         cleanup x = case stripPrefix ws x of
             Nothing -> fail "bad prefix"

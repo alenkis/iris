@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Decode.SimpleSpec (spec) where
 
 import           Data.Maybe             (fromMaybe)

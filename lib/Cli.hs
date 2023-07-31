@@ -14,27 +14,27 @@ data Command
     deriving (Eq, Show)
 
 configPathP :: Parser ConfigPath
-configPathP =
-    ConfigPath
-        <$> strOption
-            ( short 'c'
-                <> long "config"
-                <> metavar "CONFIG"
-                <> help "Path to config TOML file"
-            )
+configPathP = ConfigPath <$> strOption configField
+  where
+    configField =
+        short 'c'
+            <> long "config"
+            <> metavar "CONFIG"
+            <> help "Path to config TOML file"
 
 filePathP :: Parser FilePath
 filePathP =
-    strOption
-        ( short 'f'
+    strOption $
+        short 'f'
             <> long "file"
             <> metavar "FILE"
             <> help "Path to CSV file"
-        )
 
 transformCommand :: Mod CommandFields Command
 transformCommand =
-    command "transform" (info transformP (progDesc "Transform CSV file"))
+    command "transform" $
+        info transformP $
+            progDesc "Transform CSV file"
   where
     transformP =
         TransformCSV <$> configPathP <*> filePathP
@@ -45,11 +45,10 @@ input =
 
 getCliCommand :: IO Command
 getCliCommand =
-    execParser
-        ( info
+    execParser $
+        info
             (helper <*> versionOption <*> input)
             (header appVersion <> fullDesc)
-        )
   where
     versionOption =
         infoOption appVersion $
