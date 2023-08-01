@@ -9,8 +9,11 @@ import           Options.Applicative (CommandFields, Mod, Parser, command,
 newtype ConfigPath = ConfigPath FilePath
     deriving (Eq, Show)
 
+newtype OutputPath = OutputPath FilePath
+    deriving (Eq, Show)
+
 data Command
-    = TransformCSV ConfigPath FilePath
+    = TransformCSV ConfigPath FilePath OutputPath
     deriving (Eq, Show)
 
 configPathP :: Parser ConfigPath
@@ -22,7 +25,6 @@ configPathP = ConfigPath <$> strOption configField
             <> metavar "CONFIG"
             <> help "Path to config TOML file"
 
-
 filePathP :: Parser FilePath
 filePathP =
     strOption $
@@ -31,6 +33,16 @@ filePathP =
             <> metavar "FILE"
             <> help "Path to CSV file"
 
+outputPathP :: Parser OutputPath
+outputPathP =
+    OutputPath <$> strOption outputPathField
+  where
+    outputPathField =
+        short 'o'
+            <> long "output"
+            <> metavar "OUTPUT"
+            <> help "Path to output CSV file"
+
 transformCommand :: Mod CommandFields Command
 transformCommand =
     command "transform" $
@@ -38,7 +50,7 @@ transformCommand =
             progDesc "Transform CSV file"
   where
     transformP =
-        TransformCSV <$> configPathP <*> filePathP
+        TransformCSV <$> configPathP <*> filePathP <*> outputPathP
 
 input :: Parser Command
 input =

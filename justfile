@@ -11,10 +11,10 @@ version:
     @just run --version
 
 transform:
-    @just run transform -c examples/simple.toml -f examples/simple.txt
+    @just run transform -c examples/simple.toml -f examples/simple.txt -o examples/simple.out.csv
 
 ssense:
-    @just run transform -c examples/ssense.toml -f examples/ssense.txt
+    @just run transform -c examples/ssense.toml -f examples/ssense.txt -o examples/ssense.out.csv
 
 gen-hie:
     @gen-hie > hie.yaml

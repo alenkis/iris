@@ -5,7 +5,7 @@ separator = "\t"
 
 [[job.field]]
 name = "item_group_id"
-rename = "group_id"
+rename = "groupId"
 
 [[job.field]]
 name = "title"
@@ -15,3 +15,4 @@ name = "price"
 
 [[job.field]]
 name = "sale_price"
+rename = "salePrice"

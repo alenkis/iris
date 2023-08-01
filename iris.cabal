@@ -79,6 +79,7 @@ library
           , csv-conduit
           , ordered-containers
           , bytestring
+          , mtl
 
 executable iris
     -- Import common warning flags.
@@ -110,6 +111,7 @@ executable iris
                     , csv-conduit
                     , ordered-containers
                     , bytestring
+                    , mtl
 
     -- Directories containing source files.
     hs-source-dirs:   app, lib
