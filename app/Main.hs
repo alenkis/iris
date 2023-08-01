@@ -2,11 +2,13 @@
 
 module Main where
 
-import           Cli       (Command (TransformCSV), ConfigPath (ConfigPath),
-                            OutputPath (OutputPath), getCliCommand)
-import           Config    (Config (..), Job (..), read)
-import qualified Csv
-import           Data.Text (unpack)
+import           Cli                  (Command (TransformCSV),
+                                       ConfigPath (ConfigPath),
+                                       OutputPath (OutputPath), getCliCommand)
+import           Config               (Config (..), Job (..), read)
+import           Control.Monad.Reader (ReaderT (runReaderT))
+import           Data.Text            (unpack)
+import           Transform            (Env (..), transform)
 
 main :: IO ()
 main = do
@@ -14,7 +16,8 @@ main = do
     Config.read configPath >>= \case
         Left err -> mapM_ putStrLn err
         Right config -> do
-            Csv.process config filepath outputPath
+            let env = Env{envConfig = config}
+            _ <- runReaderT (transform filepath outputPath) env
             let jobName = (title . job) config
             putStrLn $ "Finished job " ++ unpack jobName
             putStrLn $ "Output file: " ++ outputPath

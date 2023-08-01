@@ -94,7 +94,7 @@ executable iris
         Cli
         Config
         Paths_iris
-        Csv
+        Transform
         Meta
 
     -- LANGUAGE extensions used by modules in this package.

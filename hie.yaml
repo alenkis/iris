@@ -12,10 +12,13 @@ cradle:
     - path: "app/Cli.hs"
       component: "iris:exe:iris"
 
+    - path: "app/Config.hs"
+      component: "iris:exe:iris"
+
     - path: "app/Paths_iris.hs"
       component: "iris:exe:iris"
 
-    - path: "app/Csv.hs"
+    - path: "app/Transform.hs"
       component: "iris:exe:iris"
 
     - path: "app/Meta.hs"
@@ -24,10 +27,13 @@ cradle:
     - path: "lib/Cli.hs"
       component: "iris:exe:iris"
 
+    - path: "lib/Config.hs"
+      component: "iris:exe:iris"
+
     - path: "lib/Paths_iris.hs"
       component: "iris:exe:iris"
 
-    - path: "lib/Csv.hs"
+    - path: "lib/Transform.hs"
       component: "iris:exe:iris"
 
     - path: "lib/Meta.hs"
