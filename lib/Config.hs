@@ -15,9 +15,10 @@ newtype Config = Config {job :: Job}
     deriving (Eq, Show, Generic)
 
 data Job = Job
-    { title   :: Text
-    , groupBy :: Text
-    , field   :: [Field]
+    { title     :: Text
+    , groupBy   :: Text
+    , field     :: [Field]
+    , separator :: Maybe Char
     }
     deriving (Eq, Show, Generic)
 
@@ -32,7 +33,7 @@ instance FromValue Field where
 
 instance FromValue Config where fromValue = parseTableFromValue genericParseTable
 instance FromValue Job where
-    fromValue = parseTableFromValue (Job <$> reqKey "title" <*> reqKey "group_by" <*> reqKey "field")
+    fromValue = parseTableFromValue (Job <$> reqKey "title" <*> reqKey "group_by" <*> reqKey "field" <*> optKey "separator")
 
 instance ToValue Config where toValue = defaultTableToValue
 instance ToValue Field where toValue = defaultTableToValue

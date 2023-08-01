@@ -1,17 +1,18 @@
 module Csv where
 
 import           Conduit
-import           Config            (Field (..))
+import           Config            (Config (..), Field (..), Job (..))
 import qualified Data.Conduit.List as CL
 import           Data.CSV.Conduit
 import           Data.List         (elemIndices)
+import           Data.Maybe        (fromMaybe)
 import           Data.Text         (Text)
 
 csvSettings :: Char -> CSVSettings
 csvSettings sep = defCSVSettings{csvSep = sep, csvQuoteChar = Nothing}
 
-filterColumns :: String -> String -> [Field] -> IO ()
-filterColumns sourcePath destinationPath fields =
+filterColumns :: String -> String -> Config -> IO ()
+filterColumns sourcePath destinationPath config =
     runResourceT $
         runConduit $
             source
@@ -20,8 +21,10 @@ filterColumns sourcePath destinationPath fields =
                 .| fromCSV settings
                 .| sink
   where
+    fields = (field . job) config
+    sep = fromMaybe ',' $ (separator . job) config
     source = sourceFile sourcePath
-    settings = csvSettings '\t'
+    settings = csvSettings sep
     processor :: MonadIO m => ConduitT (Row Text) (Row Text) m ()
     processor = do
         mheader <- await
@@ -35,8 +38,9 @@ filterColumns sourcePath destinationPath fields =
 
 elemIndices' :: [Field] -> Row Text -> [Int]
 elemIndices' fields row =
-    let fs = map (\(Field n _) -> n) fields
-     in concatMap (`elemIndices` row) fs
+    concatMap (`elemIndices` row) fs
+  where
+    fs = map (\(Field n _) -> n) fields
 
 filterWithIndices :: [Int] -> Row Text -> Row Text
 filterWithIndices indices row = [row !! i | i <- indices]

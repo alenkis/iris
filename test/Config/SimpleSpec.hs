@@ -23,6 +23,7 @@ spec =
                 Job
                     { title = "TOML Example"
                     , groupBy = "item_group_id"
+                    , separator = Just ','
                     , field =
                         [ Field
                             { name = "item_group_id"
@@ -42,6 +43,7 @@ spec =
         [job]
         title = "TOML Example"
         group_by = "item_group_id"
+        separator = ","
 
         [[job.field]]
         name = "item_group_id"

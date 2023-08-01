@@ -1,6 +1,7 @@
 [job]
 title = "SSENSE"
 group_by = "item_group_id"
+separator = "\t"
 
 [[job.field]]
 name = "item_group_id"
