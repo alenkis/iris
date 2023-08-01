@@ -22,6 +22,7 @@ configPathP = ConfigPath <$> strOption configField
             <> metavar "CONFIG"
             <> help "Path to config TOML file"
 
+
 filePathP :: Parser FilePath
 filePathP =
     strOption $

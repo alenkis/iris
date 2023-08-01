@@ -42,8 +42,8 @@ instance ToTable Field where toTable = genericToTable
 instance ToTable Config where toTable = genericToTable
 instance ToTable Job where toTable = genericToTable
 
-readConfig :: FilePath -> IO (Either [String] Config)
-readConfig path = do
+read :: FilePath -> IO (Either [String] Config)
+read path = do
     toml <- readFile path
     case Toml.decode toml of
         Toml.Success _ config -> return (Right config)

@@ -2,23 +2,15 @@
 
 module Main where
 
-import           Cli    (Command (TransformCSV), getCliCommand)
-
-import           Config (Field (..))
+import           Cli    (Command (TransformCSV), ConfigPath (ConfigPath),
+                         getCliCommand)
+import           Config (Config (..), Job (..), read)
 import qualified Csv
 
 main :: IO ()
 main = do
-    (TransformCSV _ filepath) <- getCliCommand
-    Csv.filterColumns filepath "./examples/output.csv" fields
+    (TransformCSV (ConfigPath configPath) filepath) <- getCliCommand
+    Config.read configPath >>= \case
+        Left err -> mapM_ putStrLn err
+        Right cfg -> Csv.filterColumns filepath "./examples/output.csv" $ (field . job) cfg
     putStrLn "Done."
-  where
-    fields =
-        [ Field{name = "item_group_id", rename = Just "group_id"}
-        , Field{name = "price", rename = Nothing}
-        , Field{name = "sale_price", rename = Nothing}
-        , Field{name = "description", rename = Nothing}
-        , Field{name = "product_type", rename = Nothing}
-        , Field{name = "mpn", rename = Nothing}
-        , Field{name = "gtin", rename = Nothing}
-        ]
