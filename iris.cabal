@@ -65,7 +65,7 @@ library
     import:           warnings
                     , extensions
     hs-source-dirs:   lib
-    exposed-modules:  Config.Decode
+    exposed-modules:  Config
     other-modules:
         Paths_iris
         Meta
@@ -141,5 +141,5 @@ test-suite spec
         
     other-modules:
         QuoteStr,
-        Config.Decode,
-        Decode.SimpleSpec
+        Config,
+        Config.SimpleSpec

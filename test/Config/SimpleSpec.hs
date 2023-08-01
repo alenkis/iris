@@ -1,12 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Decode.SimpleSpec (spec) where
+module Config.SimpleSpec (spec) where
 
 import           Data.Maybe             (fromMaybe)
 import           GHC.Generics           (Generic)
 import           QuoteStr               (quoteStr)
 
-import           Config.Decode          (Config (..), Field (..), Job (..))
+import           Config                 (Config (..), Field (..), Job (..))
 import           Test.Hspec             (Spec, describe, it, shouldBe)
 import           Toml                   (Result (..), decode, encode)
 import           Toml.FromValue         (FromValue (..), optKey,

@@ -2,8 +2,9 @@
 
 module Main where
 
-import           Cli           (Command (TransformCSV), getCliCommand)
-import           Config.Decode (Field (..))
+import           Cli    (Command (TransformCSV), getCliCommand)
+
+import           Config (Field (..))
 import qualified Csv
 
 main :: IO ()

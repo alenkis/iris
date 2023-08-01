@@ -1,7 +1,7 @@
 module Csv where
 
 import           Conduit
-import           Config.Decode     (Field (..))
+import           Config            (Field (..))
 import qualified Data.Conduit.List as CL
 import           Data.CSV.Conduit
 import           Data.List         (elemIndices)
