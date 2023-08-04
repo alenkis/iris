@@ -9,7 +9,7 @@
 - [x] Configuration based (TOML)
 - [x] Filter by column names
 - [x] Rename column names
-- [ ] Add validation using TOML comment based schema references and JSON schema files
+- [ ] Add validations
 - [ ] Output to .parquet
 - [ ] Distribute to homebrew
 

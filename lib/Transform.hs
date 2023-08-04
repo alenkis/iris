@@ -1,13 +1,17 @@
 module Transform where
 
 import           Conduit
+import qualified Conduit              as CL
 import           Config               (Config (..), Field (..), Job (..))
 import           Control.Monad.Reader (MonadReader, ReaderT, asks)
 import qualified Data.Conduit.List    as CL
 import           Data.CSV.Conduit
+import           Data.Either          (isRight, lefts)
 import           Data.List            (elemIndices)
 import           Data.Maybe           (fromMaybe)
 import           Data.Text            (Text)
+import qualified Data.Text            as T
+import           Validation           (validateField)
 
 class (Monad m) => CsvM m where
     transform :: String -> String -> m ()
@@ -51,6 +55,22 @@ process' config sourcePath destinationPath =
     settings = csvSettings sep
     sink = sinkFile destinationPath
 
+validateRow :: [Field] -> Row Text -> Either [Text] (Row Text)
+validateRow fields row =
+    case traverse validateField' (zip fields row) of
+        Left errors -> Left [errors]
+        Right validFields -> Right $ filterWithIndices (elemIndices' fields row) validFields
+
+validateField' :: (Field, Text) -> Either Text Text
+validateField' (field, value) =
+    let rules = fromMaybe [] $ validation field
+        results = map (\rule -> validateField rule value) rules
+        allValid = all isRight results
+        ls = lefts results
+     in if allValid
+            then Right value
+            else Left $ T.unwords ls
+
 processor :: (Monad m, HasConfig env, MonadReader env m) => [Field] -> ConduitT (Row Text) (Row Text) m ()
 processor fields = do
     config <- asks getConfig
@@ -58,10 +78,14 @@ processor fields = do
     case row of
         Nothing -> return ()
         Just header -> do
-            let indices = elemIndices' fields header
             let renamedHeader = renameHeader config header
             leftover renamedHeader
-            CL.map (filterWithIndices indices)
+            CL.mapM processRow
+  where
+    processRow row = case validateRow fields row of
+        Left errors -> do
+            return errors
+        Right validRow -> return validRow
 
 elemIndices' :: [Field] -> Row Text -> [Int]
 elemIndices' fields row =
