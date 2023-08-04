@@ -13,6 +13,9 @@ version:
 transform:
     @just run transform -c examples/simple.toml -f examples/simple.txt -o examples/simple.out.csv
 
+transform-and-validate:
+    @just run transform -c examples/validation.toml -f examples/validation.txt -o examples/validation.out.csv
+
 ssense:
     @just run transform -c examples/ssense.toml -f examples/ssense.txt -o examples/ssense.out.csv
 

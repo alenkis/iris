@@ -9,7 +9,7 @@ import           Data.List            (elemIndices)
 import           Data.Maybe           (fromMaybe)
 import           Data.Text            (Text)
 
-class Monad m => CsvM m where
+class (Monad m) => CsvM m where
     transform :: String -> String -> m ()
 
 newtype Env = Env {envConfig :: Config}
@@ -33,7 +33,7 @@ renameHeader config = map renameField
   where
     fields = (field . job) config
     renameField value = fromMaybe value $ lookup value renameMapping
-    renameMapping = [(name, fromMaybe name rename) | Field name rename <- fields]
+    renameMapping = [(name, fromMaybe name rename) | Field name rename _ <- fields]
 
 process' :: (MonadIO m, MonadUnliftIO m, MonadThrow m) => Config -> String -> String -> ReaderT Env m ()
 process' config sourcePath destinationPath =
@@ -68,7 +68,7 @@ elemIndices' fields row =
     concatMap (`elemIndices` row) fs
   where
     fs :: [Text]
-    fs = map (\(Field n _) -> n) fields
+    fs = map (\(Field n _ _) -> n) fields
 
 filterWithIndices :: [Int] -> Row Text -> Row Text
 filterWithIndices indices row = [row !! i | i <- indices]

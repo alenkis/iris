@@ -84,3 +84,81 @@ group_id,name,sale_price
 1,shoes,10.00
 1,socks,5.00
 ```
+
+## Field Validation Configuration
+
+You can add validations to the fields in your TOML configuration file to enforce specific rules on the data being processed. Below are the available validation rules you can use:
+
+### `non_empty`
+
+Ensures that a value is not empty.
+
+**Example:**
+
+```toml
+[[job.field]]
+name = "title"
+validation = ["non_empty"]
+```
+
+### `min_length:<length>`
+
+Ensures that a value has a minimum length.
+
+**Example:**
+
+```toml
+[[job.field]]
+name = "name"
+validation = ["min_length:2"]
+```
+
+### `max_length:<length>`
+
+Ensures that a value has a maximum length.
+
+**Example:**
+
+```toml
+[[job.field]]
+name = "brand"
+validation = ["max_length:70"]
+```
+
+### `one_of:<value1,value2,...>`
+
+Ensures that a value matches one of the specified literals.
+
+**Example:**
+
+```toml
+[[job.field]]
+name = "gender"
+validation = ["one_of:female,male,unisex"]
+```
+
+### `regex:<pattern>`
+
+Ensures that a value matches the specified regular expression pattern.
+
+**Example:**
+
+```toml
+[[job.field]]
+name = "product_id"
+validation = ["regex:\\d{2}-\\d{3}"]
+```
+
+## Combining Rules
+
+You can combine multiple validation rules for a single field by adding multiple strings to the `validation` array.
+
+**Example:**
+
+```toml
+[[job.field]]
+name = "name"
+validation = ["non_empty", "min_length:2", "max_length:20"]
+```
+
+These rules are applied in the order they appear, and the data must satisfy all of the specified validations.

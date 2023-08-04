@@ -21,4 +21,5 @@ main = do
             let jobName = (title . job) config
             putStrLn $ "Finished job " ++ unpack jobName
             putStrLn $ "Output file: " ++ outputPath
+            print config
             return ()

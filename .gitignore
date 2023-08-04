@@ -29,6 +29,6 @@ cabal.project.local~
 .ghc.environment.*
 
 examples/*.out*
-examples/*.txt
+examples/*.large*
 examples/output.csv
 iris

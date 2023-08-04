@@ -1,0 +1,23 @@
+[job]
+title = "Simple Validation"
+group_by = ""
+
+[[job.field]]
+name = "item_group_id"
+rename = "group_id"
+
+[[job.field]]
+name = "id"
+validation = ["regex:\\d{2}-\\d{3}"]
+
+[[job.field]]
+name = "name"
+validation = ["required", "non_empty"]
+
+[[job.field]]
+name = "gender"
+validation = ["one_of:f,m,F,M"]
+
+[[job.field]]
+name = "ident"
+validation = ["min_length:2", "max_length:4"]

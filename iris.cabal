@@ -69,6 +69,7 @@ library
     other-modules:
         Paths_iris
         Meta
+        Validation
     build-depends:
             base
           , toml-parser
@@ -80,6 +81,7 @@ library
           , ordered-containers
           , bytestring
           , mtl
+          , regex-tdfa
 
 executable iris
     -- Import common warning flags.
@@ -96,6 +98,7 @@ executable iris
         Paths_iris
         Transform
         Meta
+        Validation
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -112,6 +115,7 @@ executable iris
                     , ordered-containers
                     , bytestring
                     , mtl
+                    , regex-tdfa
 
     -- Directories containing source files.
     hs-source-dirs:   app, lib
