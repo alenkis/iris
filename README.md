@@ -13,9 +13,26 @@
 - [ ] Output to .parquet
 - [ ] Distribute to homebrew
 
-## Instructions
+## Installation
 
-If you have `cabal` and `just` setup, you can run
+If you have `just` installed, you can run
+
+```sh
+just build-docker
+```
+
+Otherwise, you can run docker commands manually:
+
+```sh
+@docker build -t iris:latest .
+@docker create --name iris-container iris:latest
+@docker cp iris-container:/usr/local/bin/iris .
+@docker rm iris-container
+```
+
+You can then run `./iris` to see the help menu.
+
+If you have Haskell toolchain and `just` setup, you can run
 
 ```sh
 just transform

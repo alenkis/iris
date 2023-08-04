@@ -31,3 +31,4 @@ cabal.project.local~
 examples/*.out*
 examples/*.txt
 examples/output.csv
+iris

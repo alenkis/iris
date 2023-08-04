@@ -1,46 +1,43 @@
 cradle:
   cabal:
-    - path: "lib"
+    - path: "./lib"
       component: "lib:iris"
 
-    - path: "app/Main.hs"
+    - path: "./app/Main.hs"
       component: "iris:exe:iris"
 
-    - path: "lib/Main.hs"
+    - path: "./lib/Main.hs"
       component: "iris:exe:iris"
 
-    - path: "app/Cli.hs"
+    - path: "./app/Cli.hs"
       component: "iris:exe:iris"
 
-    - path: "app/Config.hs"
+    - path: "./app/Paths_iris.hs"
       component: "iris:exe:iris"
 
-    - path: "app/Paths_iris.hs"
+    - path: "./app/Transform.hs"
       component: "iris:exe:iris"
 
-    - path: "app/Transform.hs"
+    - path: "./app/Meta.hs"
       component: "iris:exe:iris"
 
-    - path: "app/Meta.hs"
+    - path: "./lib/Cli.hs"
       component: "iris:exe:iris"
 
-    - path: "lib/Cli.hs"
+    - path: "./lib/Config.hs"
       component: "iris:exe:iris"
 
-    - path: "lib/Config.hs"
+    - path: "./lib/Paths_iris.hs"
       component: "iris:exe:iris"
 
-    - path: "lib/Paths_iris.hs"
+    - path: "./lib/Transform.hs"
       component: "iris:exe:iris"
 
-    - path: "lib/Transform.hs"
+    - path: "./lib/Meta.hs"
       component: "iris:exe:iris"
 
-    - path: "lib/Meta.hs"
-      component: "iris:exe:iris"
-
-    - path: "test"
+    - path: "./test"
       component: "iris:test:spec"
 
-    - path: "lib"
+    - path: "./lib"
       component: "iris:test:spec"

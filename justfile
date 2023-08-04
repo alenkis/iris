@@ -18,3 +18,9 @@ ssense:
 
 gen-hie:
     @gen-hie > hie.yaml
+
+build-docker:
+    @docker build -t iris:latest .
+    @docker create --name iris-container iris:latest
+    @docker cp iris-container:/usr/local/bin/iris .
+    @docker rm iris-container
