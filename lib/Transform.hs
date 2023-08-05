@@ -1,7 +1,6 @@
 module Transform where
 
-import           Conduit
-import qualified Conduit              as CL
+import           Conduit              as CL
 import           Config               (Config (..), Field (..), Job (..))
 import           Control.Monad.Reader (MonadReader, ReaderT, asks)
 import qualified Data.Conduit.List    as CL
@@ -64,24 +63,25 @@ validateRow fields row =
 validateField' :: (Field, Text) -> Either Text Text
 validateField' (field, value) =
     let rules = fromMaybe [] $ validation field
-        results = map (\rule -> validateField rule value) rules
+        results = map (`validateField` value) rules
         allValid = all isRight results
         ls = lefts results
      in if allValid
             then Right value
             else Left $ T.unwords ls
 
+-- |  Processes text rows.
 processor :: (Monad m, HasConfig env, MonadReader env m) => [Field] -> ConduitT (Row Text) (Row Text) m ()
 processor fields = do
     config <- asks getConfig
     row <- await
     case row of
         Nothing -> return ()
-        Just header -> do
-            let renamedHeader = renameHeader config header
-            leftover renamedHeader
+        Just r -> do
+            leftover $ renameHeader config r
             CL.mapM processRow
   where
+    processRow :: (Monad m) => Row Text -> m (Row Text)
     processRow row = case validateRow fields row of
         Left errors -> do
             return errors

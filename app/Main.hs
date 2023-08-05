@@ -16,8 +16,7 @@ main = do
     Config.read configPath >>= \case
         Left err -> mapM_ putStrLn err
         Right config -> do
-            let env = Env{envConfig = config}
-            _ <- runReaderT (transform filepath outputPath) env
+            _ <- runReaderT (transform filepath outputPath) $ Env config
             let jobName = (title . job) config
             putStrLn $ "Finished job " ++ unpack jobName
             putStrLn $ "Output file: " ++ outputPath

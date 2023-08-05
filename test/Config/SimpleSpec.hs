@@ -28,10 +28,12 @@ spec =
                         [ Field
                             { name = "item_group_id"
                             , rename = Just "group_id"
+                            , validation = Nothing
                             }
                         , Field
                             { name = "name"
                             , rename = Nothing
+                            , validation = Nothing
                             }
                         ]
                     }

@@ -136,15 +136,19 @@ test-suite spec
     build-tool-depends:
         hspec-discover:hspec-discover == 2.*
     build-depends:
-        base,
-        containers,
-        hspec           ^>= {2.10, 2.11},
-        hspec-discover,
-        template-haskell ^>= {2.16, 2.17, 2.18, 2.19, 2.20},
-        time,
-        toml-parser,
-        iris,
-        text
+            base
+          , containers
+          , hspec           ^>= {2.10, 2.11}
+          , hspec-discover
+          , template-haskell ^>= {2.16, 2.17, 2.18, 2.19, 2.20}
+          , time
+          , toml-parser
+          , iris
+          , text
+          , regex-tdfa
+          , csv-conduit
+          , conduit
+          , mtl
         
     other-modules:
         QuoteStr,

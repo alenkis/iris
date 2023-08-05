@@ -47,7 +47,19 @@ validateField :: Rule -> Text -> Either Text ()
 validateField rule value =
     case rule of
         RuleNonEmpty -> if T.null value then Left "Value must not be empty" else Right ()
-        RuleMinLen min' -> if T.length value < min' then Left (T.pack $ "Value must be at least " ++ show min' ++ " characters") else Right ()
-        RuleMaxLen max' -> if T.length value > max' then Left (T.pack $ "Value must be at most " ++ show max' ++ " characters") else Right ()
-        RuleOneOf choices -> if value `notElem` choices then Left (T.pack $ "Value must be one of " ++ show choices) else Right ()
-        RuleRegex pattern -> if value =~ T.unpack pattern then Right () else Left (T.pack $ "Value must match regex " ++ T.unpack pattern)
+        RuleMinLen min' ->
+            if T.length value < min'
+                then Left (T.pack $ "Value must be at least " ++ show min' ++ " characters long")
+                else Right ()
+        RuleMaxLen max' ->
+            if T.length value > max'
+                then Left (T.pack $ "Value must be at most " ++ show max' ++ " characters long")
+                else Right ()
+        RuleOneOf choices ->
+            if value `notElem` choices
+                then Left (T.pack $ "Value must be one of " ++ show choices)
+                else Right ()
+        RuleRegex pattern ->
+            if value =~ T.unpack pattern
+                then Right ()
+                else Left (T.pack $ "Value must match regex " ++ T.unpack pattern)
