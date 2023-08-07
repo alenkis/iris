@@ -17,8 +17,10 @@ main = do
         Left err -> mapM_ putStrLn err
         Right config -> do
             _ <- runReaderT (transform filepath outputPath) $ Env config
-            let jobName = (title . job) config
+            let jobName = (jobTitle . job) config
             putStrLn $ "Finished job " ++ unpack jobName
             putStrLn $ "Output file: " ++ outputPath
+            putStrLn "\n"
             print config
+            putStrLn "\n"
             return ()

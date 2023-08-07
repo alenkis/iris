@@ -21,19 +21,19 @@ spec =
     do
         let job =
                 Job
-                    { title = "TOML Example"
-                    , groupBy = "item_group_id"
-                    , separator = Just ','
-                    , field =
+                    { jobTitle = "TOML Example"
+                    , jobGroupBy = "item_group_id"
+                    , jobSeparator = Just ','
+                    , jobField =
                         [ Field
-                            { name = "item_group_id"
-                            , rename = Just "group_id"
-                            , validation = Nothing
+                            { fieldName = "item_group_id"
+                            , fieldRename = Just "group_id"
+                            , fieldValidation = Nothing
                             }
                         , Field
-                            { name = "name"
-                            , rename = Nothing
-                            , validation = Nothing
+                            { fieldName = "name"
+                            , fieldRename = Nothing
+                            , fieldValidation = Nothing
                             }
                         ]
                     }

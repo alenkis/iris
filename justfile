@@ -10,6 +10,9 @@ help:
 version:
     @just run --version
 
+test:
+    @cabal test --test-option=--color
+
 transform:
     @just run transform -c examples/simple.toml -f examples/simple.txt -o examples/simple.out.csv
 

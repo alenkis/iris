@@ -49,7 +49,7 @@ validateField rule value =
         RuleNonEmpty -> if T.null value then Left "Value must not be empty" else Right ()
         RuleMinLen min' ->
             if T.length value < min'
-                then Left (T.pack $ "Value must be at least " ++ show min' ++ " characters long")
+                then Left (T.pack $ "Value must be at least " ++ show min' ++ " characters long. Instead, got: " ++ show value)
                 else Right ()
         RuleMaxLen max' ->
             if T.length value > max'

@@ -2,6 +2,7 @@
 
 module Transform.TransformSpec (spec) where
 
+import           Data.Map.Ordered       as MO
 import           Data.Maybe             (fromMaybe)
 import           Data.Text              (Text)
 import           GHC.Generics           (Generic)
@@ -18,19 +19,20 @@ import           Toml.ToValue           (ToTable (..), ToValue (toValue),
                                          defaultTableToValue, table, (.=))
 import           Toml.ToValue.Generic   (genericToTable)
 import           Transform              (elemIndices', filterWithIndices,
-                                         validateField', validateRow)
+                                         renameHeader, validateField',
+                                         validateRow)
 import           Validation             (Rule (RuleMinLen))
 
-validateRowExpectations :: [([Rule], [Text], Either [Text] [Text])]
+validateRowExpectations :: [([Rule], OrderedMapRow Text, Either [Text] (OrderedMapRow Text))]
 validateRowExpectations =
-    [ ([RuleMinLen 2], ["h"], Left ["Value must be at least 2 characters long"])
-    , ([RuleMinLen 2], ["hi"], Right ["hi"])
-    , ([RuleMinLen 2], ["hi", "there"], Right ["hi", "there"])
+    [ ([RuleMinLen 2], MO.fromList [("field", "h")], Left ["Value must be at least 2 characters long. Instead, got: \"h\""])
+    , ([RuleMinLen 2], MO.fromList [("field", "hi")], Right $ MO.fromList [("field", "hi")])
+    , ([RuleMinLen 2], MO.fromList [("field", "hi"), ("a", "there")], Right $ MO.fromList [("field", "hi"), ("a", "there")])
     ]
 
 validateFieldExpectations :: [((Field, Text), Either Text Text)]
 validateFieldExpectations =
-    [ ((Field "field" Nothing (Just [RuleMinLen 2]), "h"), Left "Value must be at least 2 characters long")
+    [ ((Field "field" Nothing (Just [RuleMinLen 2]), "h"), Left "Value must be at least 2 characters long. Instead, got: \"h\"")
     , ((Field "field" Nothing (Just [RuleMinLen 2]), "hi"), Right "hi")
     , ((Field "field" Nothing (Just [RuleMinLen 2]), "hi there"), Right "hi there")
     ]
@@ -69,11 +71,13 @@ spec =
                 validateRowExpectations
         describe "validateField" $ do
             mapM_
-                ( \(field, expected) ->
-                    it ("should satisfy expectations for validate field " ++ show field) $
-                        validateField' field `shouldBe` expected
+                ( \((field, value), expected) ->
+                    it
+                        ("should satisfy expectations for validate field " ++ show field)
+                        $ validateField' field value `shouldBe` expected
                 )
                 validateFieldExpectations
+
         describe "filterWithIndices" $ do
             mapM_
                 ( \(indices, row, expected) ->
@@ -89,3 +93,20 @@ spec =
                         elemIndices' fields row `shouldBe` expected
                 )
                 elemIndicesExp
+        describe "renameHeader" $
+            it "should rename the header" $
+                let
+                    fields = [Field "field name" (Just "field rename") Nothing]
+                    job =
+                        Job
+                            { jobTitle = "job title"
+                            , jobGroupBy = ""
+                            , jobSeparator = Just ','
+                            , jobField = fields
+                            }
+                    config = Config job
+                 in
+                    renameHeader
+                        config
+                        (MO.singleton ("field name", "original"))
+                        `shouldBe` MO.singleton ("field rename", "original")

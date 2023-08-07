@@ -16,17 +16,17 @@ newtype Config = Config {job :: Job}
     deriving (Eq, Show, Generic)
 
 data Job = Job
-    { title     :: Text
-    , groupBy   :: Text
-    , field     :: [Field]
-    , separator :: Maybe Char
+    { jobTitle     :: Text
+    , jobGroupBy   :: Text
+    , jobField     :: [Field]
+    , jobSeparator :: Maybe Char
     }
     deriving (Eq, Show, Generic)
 
 data Field = Field
-    { name       :: Text
-    , rename     :: Maybe Text
-    , validation :: Maybe [Rule]
+    { fieldName       :: Text
+    , fieldRename     :: Maybe Text
+    , fieldValidation :: Maybe [Rule]
     }
     deriving (Eq, Show, Generic)
 
