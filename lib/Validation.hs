@@ -43,13 +43,13 @@ parseValidationRule ruleText =
             "regex" -> if T.null args then Nothing else Just $ RuleRegex args
             _ -> Nothing
 
-validateField :: Rule -> Text -> Either Text ()
-validateField rule value =
+validateField :: Rule -> (Text, Text) -> Either Text ()
+validateField rule (columnName, value) =
     case rule of
         RuleNonEmpty -> if T.null value then Left "Value must not be empty" else Right ()
         RuleMinLen min' ->
             if T.length value < min'
-                then Left (T.pack $ "Value must be at least " ++ show min' ++ " characters long. Instead, got: " ++ show value)
+                then Left (T.pack $ "Value must be at least " ++ show min' ++ " characters long. Instead, got: " ++ show value ++ " for column " ++ show columnName)
                 else Right ()
         RuleMaxLen max' ->
             if T.length value > max'

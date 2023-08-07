@@ -25,16 +25,16 @@ import           Validation             (Rule (RuleMinLen))
 
 validateRowExpectations :: [([Rule], OrderedMapRow Text, Either [Text] (OrderedMapRow Text))]
 validateRowExpectations =
-    [ ([RuleMinLen 2], MO.fromList [("field", "h")], Left ["Value must be at least 2 characters long. Instead, got: \"h\""])
+    [ ([RuleMinLen 2], MO.fromList [("field", "h")], Left ["Value must be at least 2 characters long. Instead, got: \"h\" for column \"field\""])
     , ([RuleMinLen 2], MO.fromList [("field", "hi")], Right $ MO.fromList [("field", "hi")])
     , ([RuleMinLen 2], MO.fromList [("field", "hi"), ("a", "there")], Right $ MO.fromList [("field", "hi"), ("a", "there")])
     ]
 
-validateFieldExpectations :: [((Field, Text), Either Text Text)]
+validateFieldExpectations :: [((Field, (Text, Text)), Either Text Text)]
 validateFieldExpectations =
-    [ ((Field "field" Nothing (Just [RuleMinLen 2]), "h"), Left "Value must be at least 2 characters long. Instead, got: \"h\"")
-    , ((Field "field" Nothing (Just [RuleMinLen 2]), "hi"), Right "hi")
-    , ((Field "field" Nothing (Just [RuleMinLen 2]), "hi there"), Right "hi there")
+    [ ((Field "field" Nothing (Just [RuleMinLen 2]), ("field", "h")), Left "Value must be at least 2 characters long. Instead, got: \"h\" for column \"field\"")
+    , ((Field "field" Nothing (Just [RuleMinLen 2]), ("field", "hi")), Right "hi")
+    , ((Field "field" Nothing (Just [RuleMinLen 2]), ("field", "hi there")), Right "hi there")
     ]
 
 filterWithIndicesExpectations :: [([Int], [Text], [Text])]

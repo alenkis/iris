@@ -37,7 +37,7 @@ csvSettings sep = defCSVSettings{csvSep = sep, csvQuoteChar = Nothing}
 renameHeader :: Config -> OrderedMapRow Text -> OrderedMapRow Text
 renameHeader config oldmaprow =
     MO.fromList $
-        map (first renameField) (MO.toAscList oldmaprow)
+        map (first renameField) (MO.assocs oldmaprow)
   where
     fields = (jobField . job) config
     renameField value = fromMaybe value $ lookup value renameMapping
@@ -56,8 +56,8 @@ process' config sourcePath destinationPath =
                 .| reportInvalid
                 -- process (transform) the rows
                 .| processor fields
-                -- create a bytestream from CSV Rows
-                .| fromCSV settings
+                -- write headers and create a bytestream from CSV Rows
+                .| (writeHeadersOrdered settings >> fromCSV settings)
                 -- output
                 .| sink
   where
@@ -94,17 +94,17 @@ validateConduit fields = do
 validateRow :: [Field] -> OrderedMapRow Text -> Either [Text] (OrderedMapRow Text)
 validateRow fields maprow =
     let
-        results = zipWith validateField' fields (M.elems $ MO.toMap maprow)
+        results = zipWith validateField' fields (MO.assocs maprow)
         errors = lefts results
      in
         if null errors
             then Right maprow
             else Left errors
 
-validateField' :: Field -> Text -> Either Text Text
-validateField' field value =
+validateField' :: Field -> (Text, Text) -> Either Text Text
+validateField' field (columnName, value) =
     let rules = fromMaybe [] $ fieldValidation field
-        results = map (`validateField` value) rules
+        results = map (`validateField` (columnName, value)) rules
         allValid = all isRight results
         ls = lefts results
      in if allValid
