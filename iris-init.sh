@@ -13,13 +13,16 @@ curl -L "$RELEASE_URL" -o "$TEMP_DIR/iris.tar.gz"
 # Unpack the release
 tar -xzf "$TEMP_DIR/iris.tar.gz" -C "$TEMP_DIR"
 
+# Check if iris is in a sub-directory
+IRIS_PATH=$(tar -tzf "$TEMP_DIR/iris.tar.gz" | grep "/iris$" || echo "iris")
+
 # Ensure there is a local bin directory in HOME and add to PATH
 LOCAL_BIN="$HOME/.local/bin"
 mkdir -p "$LOCAL_BIN"
 echo "export PATH=\"$LOCAL_BIN:\$PATH\"" >> "$HOME/.bashrc"
 
 # Move the iris binary to the local bin directory
-mv "$TEMP_DIR/iris" "$LOCAL_BIN"
+mv "$TEMP_DIR/$IRIS_PATH" "$LOCAL_BIN"
 
 # Clean up
 rm -r "$TEMP_DIR"
