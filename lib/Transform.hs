@@ -10,9 +10,10 @@ import           Data.CSV.Conduit
 import           Data.Either          (isRight, lefts)
 import           Data.List            (elemIndices)
 import qualified Data.Map.Ordered     as MO
-import           Data.Maybe           (fromMaybe)
+import           Data.Maybe           (catMaybes, fromMaybe, mapMaybe)
 import           Data.Text            (Text)
 import qualified Data.Text            as T
+import           Debug.Trace          (traceShow)
 import           Validation           (validateField)
 
 class (Monad m) => CsvM m where
@@ -37,11 +38,17 @@ csvSettings sep = defCSVSettings{csvSep = sep, csvQuoteChar = Nothing}
 renameHeader :: Config -> OrderedMapRow Text -> OrderedMapRow Text
 renameHeader config oldmaprow =
     MO.fromList $
-        map (first renameField) (MO.assocs oldmaprow)
+        mapMaybe (filterVals fields . first renameField) (MO.assocs oldmaprow)
   where
     fields = (jobField . job) config
     renameField value = fromMaybe value $ lookup value renameMapping
     renameMapping = [(name, fromMaybe name rename) | Field name rename _ <- fields]
+
+filterVals :: [Field] -> (Text, Text) -> Maybe (Text, Text)
+filterVals fields (k, v) =
+    if k `elem` map fieldName fields || k `elem` mapMaybe fieldRename fields
+        then Just (k, v)
+        else Nothing
 
 process' :: (MonadIO m, MonadUnliftIO m, MonadThrow m) => Config -> String -> String -> ReaderT Env m ()
 process' config sourcePath destinationPath =
@@ -54,6 +61,8 @@ process' config sourcePath destinationPath =
                 .| validateConduit fields
                 -- log invalid rows, and pass valid ones
                 .| reportInvalid
+                -- filter out columns
+                .| filterValues fields
                 -- process (transform) the rows
                 .| processor fields
                 -- write headers and create a bytestream from CSV Rows
@@ -66,6 +75,17 @@ process' config sourcePath destinationPath =
     source = sourceFile sourcePath
     settings = csvSettings sep
     sink = sinkFile destinationPath
+
+filterValues :: (Monad m) => [Field] -> ConduitT (OrderedMapRow Text) (OrderedMapRow Text) m ()
+filterValues fields = do
+    row <- await
+    case row of
+        Nothing -> return ()
+        Just maprow -> do
+            yield $
+                MO.fromList $
+                    mapMaybe (filterVals fields) (MO.assocs maprow)
+            filterValues fields
 
 {- | For every `Left` value in the stream, collects the error and console logs it.
 | For every `Right` value in the stream, passes it on.
@@ -104,12 +124,17 @@ validateRow fields maprow =
 validateField' :: Field -> (Text, Text) -> Either Text Text
 validateField' field (columnName, value) =
     let rules = fromMaybe [] $ fieldValidation field
-        results = map (`validateField` (columnName, value)) rules
-        allValid = all isRight results
-        ls = lefts results
+        doesNameMatch = fieldName field == columnName || fieldRename field == Just columnName
+        results =
+            -- traceShow (field, rules) $
+            map (`validateField` (columnName, value)) rules
+        allValid =
+            -- traceShow (fieldName field, value, results) $
+            all isRight results
+        ls = T.unwords $ lefts results
      in if allValid
             then Right value
-            else Left $ T.unwords ls
+            else Left ls
 
 -- |  Processes text rows.
 processor :: (Monad m, HasConfig env, MonadReader env m) => [Field] -> ConduitT (OrderedMapRow Text) (OrderedMapRow Text) m ()

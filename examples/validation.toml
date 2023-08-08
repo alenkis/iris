@@ -11,9 +11,14 @@ name = "id"
 
 [[job.field]]
 name = "name"
+validation = ["non_empty"]
+
+[[job.field]]
+name = "price"
 
 [[job.field]]
 name = "gender"
+validation = ["one_of:m,f"]
 
 [[job.field]]
 name = "ident"
