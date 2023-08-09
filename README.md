@@ -1,6 +1,6 @@
 # Iris
 
-`iris` is a command line tool for CSV processing.
+`iris` is a command line tool for CSV validation and processing.
 
 ## Features
 
@@ -14,7 +14,7 @@
 
 ## Installation
 
-<details open><summary>Download release and unpack:</summary>
+<details open><summary>Download release and unpack</summary>
 
 ```sh
 curl -L https://github.com/alenkis/iris/releases/download/v0.1.0.0/iris-0.1.0.0.tar.gz | tar xz
@@ -24,7 +24,7 @@ curl -L https://github.com/alenkis/iris/releases/download/v0.1.0.0/iris-0.1.0.0.
 
 </details>
 
-<details><summary>Build locally:</summary>
+<details><summary>Build locally</summary>
 If you have `just` installed, you can run
 
 ```sh
@@ -56,6 +56,8 @@ to see a simple example (`examples/simple.toml` and `examples/simple.txt`). On c
 
 You can configure processing jobs through TOML config files
 
+<details open><summary>TOML config</summary>
+
 ```toml
 [job]
 title = "Simple Transformation"
@@ -73,6 +75,10 @@ name = "price"
 rename = "sale_price"
 ```
 
+</details>
+
+<details open><summary>Input file</summary>
+
 ```text
 item_group_id,id,name,price
 0,1,apple,1.00
@@ -80,6 +86,8 @@ item_group_id,id,name,price
 1,3,shoes,10.00
 1,4,socks,5.00
 ```
+
+</details>
 
 Once you have your configuration (`.toml`) and input file (`.txt`, `.csv`, `.tsv`), you can run
 
