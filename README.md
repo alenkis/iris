@@ -10,9 +10,21 @@
 - [x] Filter by column names
 - [x] Rename column names
 - [x] Add validations
+- [ ] Error reporting
 
 ## Installation
 
+<details open><summary>Download release and unpack:</summary>
+
+```sh
+curl -L https://github.com/alenkis/iris/releases/download/v0.1.0.0/iris-0.1.0.0.tar.gz | tar xz
+
+./iris --version
+```
+
+</details>
+
+<details><summary>Build locally:</summary>
 If you have `just` installed, you can run
 
 ```sh
@@ -37,6 +49,8 @@ just transform
 ```
 
 to see a simple example (`examples/simple.toml` and `examples/simple.txt`). On completion, it will generate an output file `examples/simple.out.csv`
+
+</details>
 
 ## Configuration
 
