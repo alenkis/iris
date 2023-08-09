@@ -2,6 +2,8 @@
 
 `iris` is a command line tool for CSV validation and processing.
 
+_This project is in experimental phase and breaking changes should be expected_
+
 ## Features
 
 - [x] Constant memory processing (streams)
