@@ -1,7 +1,6 @@
 module Transform where
 
 import           Conduit              as CL
-import qualified Data.Map.Strict      as M
 
 import           Config               (Config (..), Field (..), Job (..))
 import           Control.Monad.Reader (MonadReader, ReaderT, asks)
@@ -13,7 +12,7 @@ import qualified Data.Map.Ordered     as MO
 import           Data.Maybe           (catMaybes, fromMaybe, mapMaybe)
 import           Data.Text            (Text)
 import qualified Data.Text            as T
-import           Debug.Trace          (traceShow)
+
 import           Validation           (validateField)
 
 class (Monad m) => CsvM m where
@@ -36,9 +35,8 @@ csvSettings :: Char -> CSVSettings
 csvSettings sep = defCSVSettings{csvSep = sep, csvQuoteChar = Nothing}
 
 renameHeader :: Config -> OrderedMapRow Text -> OrderedMapRow Text
-renameHeader config oldmaprow =
-    MO.fromList $
-        mapMaybe (filterVals fields . first renameField) (MO.assocs oldmaprow)
+renameHeader config =
+    mapKeysM (filterVals fields . first renameField)
   where
     fields = (jobField . job) config
     renameField value = fromMaybe value $ lookup value renameMapping
@@ -82,10 +80,11 @@ filterValues fields = do
     case row of
         Nothing -> return ()
         Just maprow -> do
-            yield $
-                MO.fromList $
-                    mapMaybe (filterVals fields) (MO.assocs maprow)
+            yield $ mapKeysM (filterVals fields) maprow
             filterValues fields
+
+mapKeysM :: ((Text, Text) -> Maybe (Text, Text)) -> OrderedMapRow Text -> OrderedMapRow Text
+mapKeysM f = MO.fromList . mapMaybe f . MO.assocs
 
 {- | For every `Left` value in the stream, collects the error and console logs it.
 | For every `Right` value in the stream, passes it on.
@@ -125,12 +124,8 @@ validateField' :: Field -> (Text, Text) -> Either Text Text
 validateField' field (columnName, value) =
     let rules = fromMaybe [] $ fieldValidation field
         doesNameMatch = fieldName field == columnName || fieldRename field == Just columnName
-        results =
-            -- traceShow (field, rules) $
-            map (`validateField` (columnName, value)) rules
-        allValid =
-            -- traceShow (fieldName field, value, results) $
-            all isRight results
+        results = map (`validateField` (columnName, value)) rules
+        allValid = all isRight results
         ls = T.unwords $ lefts results
      in if allValid
             then Right value
@@ -144,21 +139,18 @@ processor fields = do
     case row of
         Nothing -> return ()
         Just r -> do
-            -- Rename headers
             leftover $ renameHeader config r
-            -- CL.mapM processRow
-            CL.filterC
-                ( \maprow -> case validateRow fields maprow of
-                    Left _  -> False
-                    Right _ -> True
-                )
+            CL.filterC (isRight . validateRow fields)
 
 elemIndices' :: [Field] -> Row Text -> [Int]
 elemIndices' fields row =
-    let fs :: [Text]
-        fs = map fieldName fields
-        indices = concatMap (`elemIndices` row) fs
-     in if null indices then [0 .. (length row - 1)] else indices
+    let
+        indices :: [Int]
+        indices = concatMap ((`elemIndices` row) . fieldName) fields
+     in
+        if null indices
+            then [0 .. (length row - 1)]
+            else indices
 
 filterWithIndices :: [Int] -> Row Text -> Row Text
 filterWithIndices indices row = [row !! i | i <- indices, i < length row]

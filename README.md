@@ -9,9 +9,7 @@
 - [x] Configuration based (TOML)
 - [x] Filter by column names
 - [x] Rename column names
-- [ ] Add validations
-- [ ] Output to .parquet
-- [ ] Distribute to homebrew
+- [x] Add validations
 
 ## Installation
 
