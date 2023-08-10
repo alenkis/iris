@@ -36,10 +36,10 @@ just build-docker
 Otherwise, you can run docker commands manually:
 
 ```sh
-@docker build -t iris:latest .
-@docker create --name iris-container iris:latest
-@docker cp iris-container:/usr/local/bin/iris .
-@docker rm iris-container
+docker build -t iris:latest .
+docker create --name iris-container iris:latest
+docker cp iris-container:/usr/local/bin/iris .
+docker rm iris-container
 ```
 
 You can then run `./iris` to see the help menu.
