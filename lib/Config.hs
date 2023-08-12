@@ -1,4 +1,8 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Config where
+
+import qualified Data.Text              as T
 
 import           Data.Maybe             (mapMaybe)
 import           Data.Text              (Text)
@@ -51,9 +55,9 @@ instance ToTable Field where toTable = genericToTable
 instance ToTable Config where toTable = genericToTable
 instance ToTable Job where toTable = genericToTable
 
-read :: FilePath -> IO (Either [String] Config)
+read :: FilePath -> IO (Either [Text] Config)
 read path = do
     toml <- readFile path
     case Toml.decode toml of
         Toml.Success _ config -> return (Right config)
-        Toml.Failure err      -> return (Left err)
+        Toml.Failure err      -> return (Left $ map T.pack err)

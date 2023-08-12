@@ -43,23 +43,37 @@ parseValidationRule ruleText =
             "regex" -> if T.null args then Nothing else Just $ RuleRegex args
             _ -> Nothing
 
+withColumn :: Text -> Text -> Text
+withColumn columnName text = "[ " <> columnName <> " ] " <> text
+
 validateField :: Rule -> (Text, Text) -> Either Text (Text, Text)
 validateField rule (columnName, value) =
     case rule of
-        RuleNonEmpty -> if T.null value then Left "Value must not be empty" else Right (columnName, value)
+        RuleNonEmpty ->
+            if T.null value
+                then Left (withColumn columnName "Value must not be empty")
+                else Right (columnName, value)
         RuleMinLen min' ->
             if T.length value < min'
-                then Left (T.pack $ "Value must be at least " ++ show min' ++ " characters long. Instead, got: " ++ show value ++ " for column " ++ show columnName)
+                then
+                    Left
+                        ( withColumn columnName $
+                            T.pack $
+                                "Value must be at least "
+                                    ++ show min'
+                                    ++ " characters long. Instead, got: "
+                                    ++ show value
+                        )
                 else Right (columnName, value)
         RuleMaxLen max' ->
             if T.length value > max'
-                then Left (T.pack $ "Value must be at most " ++ show max' ++ " characters long")
+                then Left (withColumn columnName $ T.pack $ "Value must be at most " ++ show max' ++ " characters long")
                 else Right (columnName, value)
         RuleOneOf choices ->
             if value `notElem` choices
-                then Left (T.pack $ "Value must be one of " ++ show choices)
+                then Left (withColumn columnName $ T.pack $ "Value must be one of " ++ show choices ++ " instead got: " ++ show value)
                 else Right (columnName, value)
         RuleRegex pattern ->
             if value =~ T.unpack pattern
                 then Right (columnName, value)
-                else Left (T.pack $ "Value must match regex " ++ T.unpack pattern)
+                else Left (withColumn columnName $ T.pack $ "Value must match regex " ++ T.unpack pattern)

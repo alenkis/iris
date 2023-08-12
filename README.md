@@ -12,7 +12,7 @@ _This project is in experimental phase and breaking changes should be expected_
 - [x] Filter by column names
 - [x] Rename column names
 - [x] Add validations
-- [ ] Error reporting
+- [x] Error reporting
 
 ## Installation
 
@@ -184,3 +184,14 @@ validation = ["non_empty", "min_length:2", "max_length:20"]
 ```
 
 These rules are applied in the order they appear, and the data must satisfy all of the specified validations.
+
+## Error Reporting
+
+If a field fails validation, the error will be reported in the error output file (`errors.txt`), specifying the row number, field name, and error message.
+
+```tex
+Error at row 3: [ name ] Value must not be empty
+Error at row 4: [ gender ] Value must be one of ["m","f"] instead got: "female" [ ident ] Value must be at least 2 characters long. Instead, got: "2"
+Error at row 5: [ gender ] Value must be one of ["m","f"] instead got: "M" [ ident ] Value must be at least 2 characters long. Instead, got: ""
+Error at row 6: [ gender ] Value must be one of ["m","f"] instead got: "male"
+```
