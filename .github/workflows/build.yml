@@ -1,0 +1,36 @@
+name: Iris CI
+
+on:
+  push:
+    branches:
+      - master
+      - gh-actions-build
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [macos-latest]
+        arch: [aarch64, amd64]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Haskell with GHC
+        uses: actions/setup-haskell@v1
+        with:
+          ghc-version: "9.4.5"
+
+      - name: Install Cabal
+        run: |
+          brew install cabal-install
+          cabal update
+
+      - name: Build Project
+        env:
+          ARCH: ${{ matrix.arch }}
+        run: |
+          cabal build
