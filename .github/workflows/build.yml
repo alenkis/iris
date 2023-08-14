@@ -1,36 +1,111 @@
-name: Iris CI
+name: build
 
 on:
   push:
-    branches:
-      - master
-      - gh-actions-build
+    branches: [master, gh-actions-build]
+
+permissions:
+  contents: read
 
 jobs:
   build:
+    name: GHC ${{ matrix.ghc-version }} on ${{ matrix.os }} ${{ matrix.arch }}
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [macos-latest]
+        os: [ubuntu-latest, macos-latest]
+        ghc-version: ["9.4.5"]
         arch: [aarch64, amd64]
 
-    runs-on: ${{ matrix.os }}
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - name: Setup Haskell with GHC
-        uses: actions/setup-haskell@v1
+      - name: Set up GHC ${{ matrix.ghc-version }}
+        uses: haskell/actions/setup@v2
+        id: setup
         with:
-          ghc-version: "9.4.5"
+          ghc-version: ${{ matrix.ghc-version }}
+          cabal-version: "latest"
+          cabal-update: true
 
-      - name: Install Cabal
+      - name: Generate Cache Key
+        id: cache-keys
+        run: echo "key=${{ runner.os }}-ghc-${{ steps.setup.outputs.ghc-version }}-cabal-${{ steps.setup.outputs.cabal-version }}" >> $GITHUB_ENV
+
+      - name: Configure the build
         run: |
-          brew install cabal-install
-          cabal update
+          cabal configure --enable-tests --enable-benchmarks --disable-documentation
+          cabal build --dry-run
 
-      - name: Build Project
+      - name: Restore cached dependencies
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: ${{ steps.setup.outputs.cabal-store }}
+          key: ${{ env.key }}-plan-${{ hashFiles('**/plan.json') }}
+          restore-keys: ${{ env.key }}-
+
+      - name: Install dependencies
+        run: cabal build all --only-dependencies
+
+      - name: Save cached dependencies
+        uses: actions/cache@v3
+        if: steps.cache.outputs.cache-primary-key != steps.cache.outputs.cache-matched-key
+        with:
+          path: ${{ steps.setup.outputs.cabal-store }}
+          key: ${{ steps.cache.outputs.cache-primary-key }}
+
+      - name: Build
+        run: cabal build
+
+      - name: Run tests
+        run: cabal test all
+
+      - name: Create Release
+        id: create_release
+        uses: elgohr/Github-Release-Action@v4
         env:
-          ARCH: ${{ matrix.arch }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          title: ${{ matrix.os }} ${{ matrix.arch }} GHC ${{ matrix.ghc-version }}
+
+      - name: Archive production artifacts
         run: |
-          cabal build
+          # Translate RUNNER_OS to lowercase and RUNNER_ARCH to match the structure
+          case $RUNNER_OS in
+          "Linux") os_name="linux" ;;
+          "Windows") os_name="windows" ;;
+          "macOS") os_name="osx" ;;
+          *) echo "Unsupported OS" && exit 1 ;;
+          esac
+
+          case $RUNNER_ARCH in
+          "X86") arch_name="x86" ;;
+          "X64") arch_name="amd64" ;;
+          "ARM") arch_name="arm" ;;
+          "ARM64") arch_name="aarch64" ;;
+          *) echo "Unsupported architecture" && exit 1 ;;
+          esac
+
+          # Extract version from cabal file
+          version=$(grep '^version:' ./iris.cabal | awk '{print $2}')
+
+          # Construct path
+          artifact_path="./dist-newstyle/build/$arch_name-$os_name/ghc-9.4.5/iris-$version/x/iris/build/iris/iris"
+
+          # Create directory for artifacts and copy
+          mkdir -p artifacts/$arch_name
+          cp $artifact_path artifacts/$arch_name/
+
+          # Archive artifacts
+          tar -czvf artifacts-$arch_name.tar.gz -C artifacts/$arch_name .
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts-${{ matrix.arch }}.tar.gz
+          asset_name: artifacts-${{ matrix.arch }}.tar.gz
+          asset_content_type: application/gzip
