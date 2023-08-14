@@ -18,21 +18,37 @@ import           Toml.FromValue.Generic (genericParseTable)
 import           Toml.ToValue           (ToTable (..), ToValue (toValue),
                                          defaultTableToValue, table, (.=))
 import           Toml.ToValue.Generic   (genericToTable)
-import           Transform              (elemIndices', filterWithIndices,
+import           Transform              (RowMapIndexed, ValidationResult,
+                                         elemIndices', filterWithIndices,
                                          renameHeader, validateField',
                                          validateRow)
 import           Validation             (Rule (RuleMinLen))
 
-validateRowExpectations :: [([Rule], OrderedMapRow Text, Either [Text] (OrderedMapRow Text))]
+validateRowExpectations :: [([Rule], RowMapIndexed, ValidationResult)]
 validateRowExpectations =
-    [ ([RuleMinLen 2], MO.fromList [("field", "h")], Left ["Value must be at least 2 characters long. Instead, got: \"h\" for column \"field\""])
-    , ([RuleMinLen 2], MO.fromList [("field", "hi")], Right $ MO.fromList [("field", "hi")])
-    , ([RuleMinLen 2], MO.fromList [("field", "hi"), ("a", "there")], Right $ MO.fromList [("field", "hi"), ("a", "there")])
+    [
+        ( [RuleMinLen 2]
+        , (MO.fromList [("field", "h")], 0)
+        , Left (["[ field ] Value must be at least 2 characters long. Instead, got: \"h\""], 0)
+        )
+    ,
+        ( [RuleMinLen 2]
+        , (MO.fromList [("field", "hi")], 0)
+        , Right (MO.fromList [("field", "hi")], 0)
+        )
+    ,
+        ( [RuleMinLen 2]
+        , (MO.fromList [("field", "hi"), ("a", "there")], 0)
+        , Right (MO.fromList [("field", "hi"), ("a", "there")], 0)
+        )
     ]
 
 validateFieldExpectations :: [((Field, (Text, Text)), Either Text Text)]
 validateFieldExpectations =
-    [ ((Field "field" Nothing (Just [RuleMinLen 2]), ("field", "h")), Left "Value must be at least 2 characters long. Instead, got: \"h\" for column \"field\"")
+    [
+        ( (Field "field" Nothing (Just [RuleMinLen 2]), ("field", "h"))
+        , Left "[ field ] Value must be at least 2 characters long. Instead, got: \"h\""
+        )
     , ((Field "field" Nothing (Just [RuleMinLen 2]), ("field", "hi")), Right "hi")
     , ((Field "field" Nothing (Just [RuleMinLen 2]), ("field", "hi there")), Right "hi there")
     ]
