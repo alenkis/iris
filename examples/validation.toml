@@ -1,25 +1,23 @@
-[job]
 title = "Simple Validation"
-group_by = ""
 
-[[job.field]]
+[[columns]]
 name = "item_group_id"
 rename = "group_id"
 
-[[job.field]]
+[[columns]]
 name = "id"
 
-[[job.field]]
+[[columns]]
 name = "name"
 validation = ["non_empty"]
 
-[[job.field]]
+[[columns]]
 name = "price"
 
-[[job.field]]
+[[columns]]
 name = "gender"
 validation = ["one_of:m,f"]
 
-[[job.field]]
+[[columns]]
 name = "ident"
 validation = ["min_length:2"]

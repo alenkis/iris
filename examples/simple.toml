@@ -1,14 +1,12 @@
-[job]
 title = "Simple Transformation"
-group_by = "item_group_id"
 
-[[job.field]]
+[[columns]]
 name = "item_group_id"
 rename = "group_id"
 
-[[job.field]]
+[[columns]]
 name = "name"
 
-[[job.field]]
+[[columns]]
 name = "price"
 rename = "sale_price"

@@ -102,7 +102,7 @@ spec =
                             { jobTitle = "job title"
                             , jobGroupBy = ""
                             , jobSeparator = Just ','
-                            , jobField = fields
+                            , jobColumns = fields
                             }
                     config = Config job
                  in

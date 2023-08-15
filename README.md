@@ -61,18 +61,17 @@ You can configure processing jobs through TOML config files
 <details open><summary>TOML config</summary>
 
 ```toml
-[job]
 title = "Simple Transformation"
 group_by = "item_group_id"
 
-[[job.field]]
+[[columns]]
 name = "item_group_id"
 rename = "group_id"
 
-[[job.field]]
+[[columns]]
 name = "name"
 
-[[job.field]]
+[[columns]]
 name = "price"
 rename = "sale_price"
 ```
@@ -118,7 +117,7 @@ Ensures that a value is not empty.
 **Example:**
 
 ```toml
-[[job.field]]
+[[columns]]
 name = "title"
 validation = ["non_empty"]
 ```
@@ -130,7 +129,7 @@ Ensures that a value has a minimum length.
 **Example:**
 
 ```toml
-[[job.field]]
+[[columns]]
 name = "name"
 validation = ["min_length:2"]
 ```
@@ -142,7 +141,7 @@ Ensures that a value has a maximum length.
 **Example:**
 
 ```toml
-[[job.field]]
+[[columns]]
 name = "brand"
 validation = ["max_length:70"]
 ```
@@ -154,7 +153,7 @@ Ensures that a value matches one of the specified literals.
 **Example:**
 
 ```toml
-[[job.field]]
+[[columns]]
 name = "gender"
 validation = ["one_of:female,male,unisex"]
 ```
@@ -166,7 +165,7 @@ Ensures that a value matches the specified regular expression pattern.
 **Example:**
 
 ```toml
-[[job.field]]
+[[columns]]
 name = "product_id"
 validation = ["regex:\\d{2}-\\d{3}"]
 ```
@@ -178,7 +177,7 @@ You can combine multiple validation rules for a single field by adding multiple 
 **Example:**
 
 ```toml
-[[job.field]]
+[[columns]]
 name = "name"
 validation = ["non_empty", "min_length:2", "max_length:20"]
 ```

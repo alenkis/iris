@@ -1,7 +1,7 @@
 module Transform where
 
 import           Conduit              as CL
-import           Config               (Config (..), Field (..), Job (..))
+import           Config               (Column (..), Config (..))
 import           Control.Monad        (unless)
 import           Control.Monad.Reader (MonadReader, ReaderT, asks)
 import           Control.Monad.State  (MonadState (get, put), StateT,
@@ -20,7 +20,6 @@ import           Validation           (validateField)
 type RowMap = OrderedMapRow Text
 type RowMapIndexed = (RowMap, Int)
 type ErrorsIndexed = (Row Text, Int)
-
 type ValidationResult = Either ErrorsIndexed RowMapIndexed
 
 class (Monad m) => Transformer m where
@@ -46,13 +45,13 @@ renameHeader :: Config -> OrderedMapRow Text -> OrderedMapRow Text
 renameHeader config =
     mapKeysM (filterVals fields . first renameField)
   where
-    fields = (jobField . job) config
+    fields = jobColumns config
     renameField value = fromMaybe value $ lookup value renameMapping
-    renameMapping = [(name, fromMaybe name rename) | Field name rename _ <- fields]
+    renameMapping = [(name, fromMaybe name rename) | Column name rename _ <- fields]
 
-filterVals :: [Field] -> (Text, Text) -> Maybe (Text, Text)
+filterVals :: [Column] -> (Text, Text) -> Maybe (Text, Text)
 filterVals fields (k, v) =
-    if k `elem` map fieldName fields || k `elem` mapMaybe fieldRename fields
+    if k `elem` map columnName fields || k `elem` mapMaybe columnRename fields
         then Just (k, v)
         else Nothing
 
@@ -72,8 +71,8 @@ doTransform config sourcePath destinationPath =
     runResourceT $
         evalStateT (runConduit pipeline) 2 -- start at 2 because of headers
   where
-    fields = (jobField . job) config
-    sep = fromMaybe ',' $ (jobSeparator . job) config
+    fields = jobColumns config
+    sep = fromMaybe ',' $ jobSeparator config
     source = sourceFile $ T.unpack sourcePath
     settings = csvSettings sep
     pipeline =
@@ -95,7 +94,7 @@ doTransform config sourcePath destinationPath =
             -- output
             .| sinkFile (T.unpack destinationPath)
 
-filterValues :: (Monad m) => [Field] -> ConduitT RowMapIndexed RowMapIndexed m ()
+filterValues :: (Monad m) => [Column] -> ConduitT RowMapIndexed RowMapIndexed m ()
 filterValues fields = do
     row <- await
     case row of
@@ -135,7 +134,7 @@ reportInvalid errorFilePath = loop []
                 loop errorBuffer
 
 -- | Validates a conduit row and outputs the result of the validation as an `Either`.
-validateConduit :: (Monad m) => [Field] -> ConduitT RowMapIndexed ValidationResult m ()
+validateConduit :: (Monad m) => [Column] -> ConduitT RowMapIndexed ValidationResult m ()
 validateConduit fields = do
     row <- await
     case row of
@@ -144,7 +143,7 @@ validateConduit fields = do
             yield $ validateRow fields r
             validateConduit fields
 
-validateRow :: [Field] -> RowMapIndexed -> ValidationResult
+validateRow :: [Column] -> RowMapIndexed -> ValidationResult
 validateRow fields (maprow, index) =
     let
         results = zipWith validateField' fields (MO.assocs maprow)
@@ -154,9 +153,9 @@ validateRow fields (maprow, index) =
             then Right (maprow, index)
             else Left (errors, index)
 
-validateField' :: Field -> (Text, Text) -> Either Text Text
+validateField' :: Column -> (Text, Text) -> Either Text Text
 validateField' field (columnName, value) =
-    let rules = fromMaybe [] $ fieldValidation field
+    let rules = fromMaybe [] $ columnValidationRules field
         results = map (`validateField` (columnName, value)) rules
         allValid = all isRight results
         ls = T.unwords $ lefts results
@@ -165,7 +164,7 @@ validateField' field (columnName, value) =
             else Left ls
 
 -- |  Processes text rows.
-processor :: (Monad m, HasConfig env, MonadReader env m) => [Field] -> ConduitT RowMapIndexed RowMap m ()
+processor :: (Monad m, HasConfig env, MonadReader env m) => [Column] -> ConduitT RowMapIndexed RowMap m ()
 processor fields = do
     config <- asks getConfig
     row <- await
@@ -179,11 +178,11 @@ processor fields = do
     foobar :: (Monad m) => ConduitT RowMapIndexed RowMap m ()
     foobar = CL.filterC (isRight . validateRow fields) .| CL.mapC fst
 
-elemIndices' :: [Field] -> Row Text -> [Int]
+elemIndices' :: [Column] -> Row Text -> [Int]
 elemIndices' fields row =
     let
         indices :: [Int]
-        indices = concatMap ((`elemIndices` row) . fieldName) fields
+        indices = concatMap ((`elemIndices` row) . columnName) fields
      in
         if null indices
             then [0 .. (length row - 1)]

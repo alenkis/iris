@@ -16,48 +16,49 @@ import           Toml.ToValue           (ToTable (..), ToValue (toValue),
 import           Toml.ToValue.Generic   (genericToTable)
 import           Validation             (Rule, parseValidationRule)
 
-newtype Config = Config {job :: Job}
-    deriving (Eq, Show, Generic)
-
-data Job = Job
+data Config = Config
     { jobTitle     :: Text
     , jobGroupBy   :: Maybe Text
-    , jobField     :: [Field]
     , jobSeparator :: Maybe Char
+    , jobColumns   :: [Column]
     }
     deriving (Eq, Show, Generic)
 
-data Field = Field
-    { fieldName       :: Text
-    , fieldRename     :: Maybe Text
-    , fieldValidation :: Maybe [Rule]
+data Column = Column
+    { columnName            :: Text
+    , columnRename          :: Maybe Text
+    , columnValidationRules :: Maybe [Rule]
     }
     deriving (Eq, Show, Generic)
 
-instance FromValue Field where
+instance FromValue Column where
     fromValue =
         parseTableFromValue $ do
             name <- reqKey "name"
             rename <- optKey "rename"
             validation <- optKey "validation"
             let validations = fmap (mapMaybe parseValidationRule) validation
-            return (Field name rename validations)
+            return (Column name rename validations)
 
-instance FromValue Config where fromValue = parseTableFromValue genericParseTable
-instance FromValue Job where
-    fromValue = parseTableFromValue (Job <$> reqKey "title" <*> optKey "group_by" <*> reqKey "field" <*> optKey "separator")
+instance FromValue Config where
+    fromValue =
+        parseTableFromValue
+            ( Config
+                <$> reqKey "title"
+                <*> optKey "group_by"
+                <*> optKey "separator"
+                <*> reqKey "columns"
+            )
 
 instance ToValue Config where toValue = defaultTableToValue
-instance ToValue Field where toValue = defaultTableToValue
-instance ToValue Job where toValue = defaultTableToValue
+instance ToValue Column where toValue = defaultTableToValue
 
-instance ToTable Field where toTable = genericToTable
+instance ToTable Column where toTable = genericToTable
 instance ToTable Config where toTable = genericToTable
-instance ToTable Job where toTable = genericToTable
 
 read :: FilePath -> IO (Either [Text] Config)
 read path = do
     toml <- readFile path
     case Toml.decode toml of
         Toml.Success _ config -> return (Right config)
-        Toml.Failure err      -> return (Left $ map T.pack err)
+        Toml.Failure err      -> return (Left $ map T.pack (err ++ [toml]))

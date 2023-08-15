@@ -5,7 +5,7 @@ module Main where
 import           Cli                  (Command (TransformCSV),
                                        ConfigPath (ConfigPath),
                                        OutputPath (OutputPath), getCliCommand)
-import           Config               (Config (..), Job (..), read)
+import           Config               (Config (..), read)
 import           Control.Monad.Reader (ReaderT (runReaderT))
 import           Data.Text            (unpack)
 import qualified Data.Text            as T
@@ -18,7 +18,7 @@ main = do
         Left err -> mapM_ print err
         Right config -> do
             _ <- runReaderT (transform (T.pack filepath) (T.pack outputPath)) $ Env config
-            let jobName = (jobTitle . job) config
+            let jobName = jobTitle config
             putStrLn "\n"
             putStrLn $ "Finished job " ++ unpack jobName
             putStrLn $ "Output file: " ++ outputPath

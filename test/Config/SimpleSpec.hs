@@ -22,9 +22,9 @@ spec =
         let job =
                 Job
                     { jobTitle = "TOML Example"
-                    , jobGroupBy = "item_group_id"
+                    , jobGroupBy = Just "item_group_id"
                     , jobSeparator = Just ','
-                    , jobField =
+                    , jobColumns =
                         [ Field
                             { fieldName = "item_group_id"
                             , fieldRename = Just "group_id"
