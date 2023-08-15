@@ -1,10 +1,11 @@
 module Cli where
 
 import           Meta                (appVersion)
-import           Options.Applicative (CommandFields, Mod, Parser, command,
-                                      execParser, fullDesc, header, help,
-                                      helper, info, infoOption, long, metavar,
-                                      progDesc, short, strOption, subparser)
+import           Options.Applicative (CommandFields, Mod, Parser, argument,
+                                      command, execParser, fullDesc, header,
+                                      help, helper, info, infoOption, long,
+                                      metavar, progDesc, short, str, strOption,
+                                      subparser)
 
 newtype ConfigPath = ConfigPath FilePath
     deriving (Eq, Show)
@@ -14,6 +15,7 @@ newtype OutputPath = OutputPath FilePath
 
 data Command
     = TransformCSV ConfigPath FilePath OutputPath
+    | DiffCSV FilePath FilePath
     deriving (Eq, Show)
 
 configPathP :: Parser ConfigPath
@@ -52,9 +54,19 @@ transformCommand =
     transformP =
         TransformCSV <$> configPathP <*> filePathP <*> outputPathP
 
+diffCommand :: Mod CommandFields Command
+diffCommand =
+    command "diff" $
+        info diffP $
+            progDesc "Diff CSV files"
+  where
+    file = argument str (metavar "FILE")
+    diffP = DiffCSV <$> file <*> file
+
 input :: Parser Command
 input =
-    subparser transformCommand
+    subparser $
+        transformCommand <> diffCommand
 
 getCliCommand :: IO Command
 getCliCommand =
