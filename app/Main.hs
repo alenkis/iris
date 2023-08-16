@@ -8,7 +8,7 @@ import           Config               (Config (..), read)
 import           Control.Monad.Reader (ReaderT (runReaderT))
 import           Data.Text            (unpack)
 import qualified Data.Text            as T
-import           Transform            (Env (..), transform)
+import           Process              (Env (..), transform)
 
 main :: IO ()
 main =
@@ -23,11 +23,8 @@ handleTransform configPath filePath outputPath =
         Left err -> mapM_ print err
         Right config -> do
             _ <- runReaderT (transform (T.pack filePath) (T.pack outputPath)) $ Env config
-            let jobName = jobTitle config
-            putStrLn "\n"
-            putStrLn $ "Finished job " ++ unpack jobName
-            putStrLn $ "Output file: " ++ outputPath
-            putStrLn "\n"
+            putStrLn $ "\nFinished job " ++ unpack (jobTitle config)
+            putStrLn $ "Output file: " ++ outputPath ++ "\n"
             return ()
 
 handleDiff :: FilePath -> FilePath -> IO ()

@@ -6,7 +6,7 @@ import           Data.Maybe             (fromMaybe)
 import           GHC.Generics           (Generic)
 import           QuoteStr               (quoteStr)
 
-import           Config                 (Config (..), Field (..), Job (..))
+import           Config                 (Column (..), Config (..))
 import           Test.Hspec             (Spec, describe, it, shouldBe)
 import           Toml                   (Result (..), decode, encode)
 import           Toml.FromValue         (FromValue (..), optKey,
@@ -19,39 +19,37 @@ import           Toml.ToValue.Generic   (genericToTable)
 spec :: Spec
 spec =
     do
-        let job =
-                Job
+        let expect =
+                Config
                     { jobTitle = "TOML Example"
                     , jobGroupBy = Just "item_group_id"
                     , jobSeparator = Just ','
                     , jobColumns =
-                        [ Field
-                            { fieldName = "item_group_id"
-                            , fieldRename = Just "group_id"
-                            , fieldValidation = Nothing
+                        [ Column
+                            { columnName = "item_group_id"
+                            , columnRename = Just "group_id"
+                            , columnValidationRules = Nothing
                             }
-                        , Field
-                            { fieldName = "name"
-                            , fieldRename = Nothing
-                            , fieldValidation = Nothing
+                        , Column
+                            { columnName = "name"
+                            , columnRename = Nothing
+                            , columnValidationRules = Nothing
                             }
                         ]
                     }
-        let expect = Config{job = job}
 
         let decodedInput =
                 decode
                     [quoteStr|
-        [job]
         title = "TOML Example"
         group_by = "item_group_id"
         separator = ","
 
-        [[job.field]]
+        [[columns]]
         name = "item_group_id"
         rename = "group_id"
 
-        [[job.field]]
+        [[columns]]
         name = "name"
         |]
 

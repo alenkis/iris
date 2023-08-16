@@ -8,8 +8,12 @@ import           Data.Text              (Text)
 import           GHC.Generics           (Generic)
 import           QuoteStr               (quoteStr)
 
-import           Config                 (Config (..), Field (..), Job (..))
+import           Config                 (Column (..), Config (..))
 import           Data.CSV.Conduit
+import           Process                (RowMapIndexed, ValidationResult,
+                                         elemIndices', filterWithIndices,
+                                         renameHeader, validateField',
+                                         validateRow)
 import           Test.Hspec             (Spec, describe, it, shouldBe)
 import           Toml                   (Result (..), decode, encode)
 import           Toml.FromValue         (FromValue (..), optKey,
@@ -18,23 +22,20 @@ import           Toml.FromValue.Generic (genericParseTable)
 import           Toml.ToValue           (ToTable (..), ToValue (toValue),
                                          defaultTableToValue, table, (.=))
 import           Toml.ToValue.Generic   (genericToTable)
-import           Transform              (elemIndices', filterWithIndices,
-                                         renameHeader, validateField',
-                                         validateRow)
 import           Validation             (Rule (RuleMinLen))
 
-validateRowExpectations :: [([Rule], OrderedMapRow Text, Either [Text] (OrderedMapRow Text))]
+validateRowExpectations :: [([Rule], RowMapIndexed, ValidationResult)]
 validateRowExpectations =
-    [ ([RuleMinLen 2], MO.fromList [("field", "h")], Left ["Value must be at least 2 characters long. Instead, got: \"h\" for column \"field\""])
-    , ([RuleMinLen 2], MO.fromList [("field", "hi")], Right $ MO.fromList [("field", "hi")])
-    , ([RuleMinLen 2], MO.fromList [("field", "hi"), ("a", "there")], Right $ MO.fromList [("field", "hi"), ("a", "there")])
+    [ ([RuleMinLen 2], (MO.fromList [("field", "h")], 0), Left (["[ field ] Value must be at least 2 characters long. Instead, got: \"h\""], 0))
+    , ([RuleMinLen 2], (MO.fromList [("field", "hi")], 0), Right (MO.fromList [("field", "hi")], 0))
+    , ([RuleMinLen 2], (MO.fromList [("field", "hi"), ("a", "there")], 0), Right (MO.fromList [("field", "hi"), ("a", "there")], 0))
     ]
 
-validateFieldExpectations :: [((Field, (Text, Text)), Either Text Text)]
+validateFieldExpectations :: [((Column, (Text, Text)), Either Text Text)]
 validateFieldExpectations =
-    [ ((Field "field" Nothing (Just [RuleMinLen 2]), ("field", "h")), Left "Value must be at least 2 characters long. Instead, got: \"h\" for column \"field\"")
-    , ((Field "field" Nothing (Just [RuleMinLen 2]), ("field", "hi")), Right "hi")
-    , ((Field "field" Nothing (Just [RuleMinLen 2]), ("field", "hi there")), Right "hi there")
+    [ ((Column "field" Nothing (Just [RuleMinLen 2]), ("field", "h")), Left "[ field ] Value must be at least 2 characters long. Instead, got: \"h\"")
+    , ((Column "field" Nothing (Just [RuleMinLen 2]), ("field", "hi")), Right "hi")
+    , ((Column "field" Nothing (Just [RuleMinLen 2]), ("field", "hi there")), Right "hi there")
     ]
 
 filterWithIndicesExpectations :: [([Int], [Text], [Text])]
@@ -46,13 +47,13 @@ filterWithIndicesExpectations =
     , ([0, 1], ["hi", "there"], ["hi", "there"])
     ]
 
-elemIndicesExp :: [([Field], [Text], [Int])]
+elemIndicesExp :: [([Column], [Text], [Int])]
 elemIndicesExp =
     [
         (
-            [ Field "field1" Nothing Nothing
-            , Field "field2" Nothing Nothing
-            , Field "field3" Nothing Nothing
+            [ Column "field1" Nothing Nothing
+            , Column "field2" Nothing Nothing
+            , Column "field3" Nothing Nothing
             ]
         , ["field2", "field3"]
         , [0, 1]
@@ -66,7 +67,7 @@ spec =
             mapM_
                 ( \(rules, row, expected) ->
                     it ("should satisfy expectations for " ++ show row) $
-                        validateRow [Field "field" Nothing (Just rules)] row `shouldBe` expected
+                        validateRow [Column "field" Nothing (Just rules)] row `shouldBe` expected
                 )
                 validateRowExpectations
         describe "validateField" $ do
@@ -96,15 +97,14 @@ spec =
         describe "renameHeader" $
             it "should rename the header" $
                 let
-                    fields = [Field "field name" (Just "field rename") Nothing]
-                    job =
-                        Job
+                    fields = [Column "field name" (Just "field rename") Nothing]
+                    config =
+                        Config
                             { jobTitle = "job title"
-                            , jobGroupBy = ""
+                            , jobGroupBy = Nothing
                             , jobSeparator = Just ','
                             , jobColumns = fields
                             }
-                    config = Config job
                  in
                     renameHeader
                         config

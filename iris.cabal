@@ -97,7 +97,7 @@ executable iris
         Cli
         Config
         Paths_iris
-        Transform
+        Process
         Meta
         Validation
 
@@ -155,5 +155,4 @@ test-suite spec
         
     other-modules:
         QuoteStr,
-        Config,
-        Config.SimpleSpec
+        Config

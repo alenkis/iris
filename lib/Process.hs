@@ -1,4 +1,4 @@
-module Transform where
+module Process where
 
 import           Conduit              as CL
 import           Config               (Column (..), Config (..))
@@ -9,7 +9,7 @@ import           Control.Monad.State  (MonadState (get, put), StateT,
 import           Data.Bifunctor       (first)
 import           Data.CSV.Conduit
 import           Data.Either          (isRight, lefts)
-import           Data.List            (elemIndices)
+import           Data.List            (elemIndices, (\\))
 import qualified Data.Map.Ordered     as MO
 import           Data.Maybe           (fromMaybe, mapMaybe)
 import           Data.Text            (Text)
@@ -22,15 +22,19 @@ type RowMapIndexed = (RowMap, Int)
 type ErrorsIndexed = (Row Text, Int)
 type ValidationResult = Either ErrorsIndexed RowMapIndexed
 
-class (Monad m) => Transformer m where
+class (Monad m) => Processor m where
     transform :: Text -> Text -> m ()
+    diff :: Text -> Text -> m ()
 
 newtype Env = Env {envConfig :: Config}
 
-instance (MonadIO m, MonadUnliftIO m, MonadThrow m) => Transformer (ReaderT Env m) where
+instance (MonadIO m, MonadUnliftIO m, MonadThrow m) => Processor (ReaderT Env m) where
     transform source destination = do
         envConfig <- asks envConfig
         doTransform envConfig source destination
+    diff source destination = do
+        envConfig <- asks envConfig
+        doDiff envConfig source destination
 
 class HasConfig env where
     getConfig :: env -> Config
@@ -93,6 +97,18 @@ doTransform config sourcePath destinationPath =
             .| (writeHeadersOrdered settings >> fromCSV settings)
             -- output
             .| sinkFile (T.unpack destinationPath)
+
+doDiff :: (MonadIO m, MonadUnliftIO m, MonadThrow m) => Config -> Text -> Text -> ReaderT Env m ()
+doDiff config fileOld fileNew =
+    runResourceT $ runConduit pipeline
+  where
+    settings = csvSettings (fromMaybe ',' $ jobSeparator config)
+    pipeline = undefined
+
+    diffRows :: ([String], [String]) -> [[String]]
+    diffRows (old, new)
+        | old == new = ["same" : old]
+        | otherwise = ["changed" : old] ++ ["added" : (new \\ old)] ++ ["removed" : (old \\ new)]
 
 filterValues :: (Monad m) => [Column] -> ConduitT RowMapIndexed RowMapIndexed m ()
 filterValues fields = do
