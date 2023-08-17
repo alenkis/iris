@@ -2,19 +2,18 @@
 
 module Config where
 
-import qualified Data.Text              as T
+import qualified Data.Text            as T
 
-import           Data.Maybe             (mapMaybe)
-import           Data.Text              (Text)
-import           GHC.Generics           (Generic)
+import           Data.Maybe           (mapMaybe)
+import           Data.Text            (Text)
+import           GHC.Generics         (Generic)
 import qualified Toml
-import           Toml.FromValue         (FromValue (..), optKey,
-                                         parseTableFromValue, reqKey)
-import           Toml.FromValue.Generic (genericParseTable)
-import           Toml.ToValue           (ToTable (..), ToValue (toValue),
-                                         defaultTableToValue)
-import           Toml.ToValue.Generic   (genericToTable)
-import           Validation             (Rule, parseValidationRule)
+import           Toml.FromValue       (FromValue (..), optKey,
+                                       parseTableFromValue, reqKey)
+import           Toml.ToValue         (ToTable (..), ToValue (toValue),
+                                       defaultTableToValue)
+import           Toml.ToValue.Generic (genericToTable)
+import           Validation           (Rule, parseValidationRule)
 
 data Config = Config
     { jobTitle     :: Text

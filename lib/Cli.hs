@@ -15,7 +15,7 @@ newtype OutputPath = OutputPath FilePath
 
 data Command
     = TransformCSV ConfigPath FilePath OutputPath
-    | DiffCSV FilePath FilePath
+    | DiffCSV ConfigPath FilePath FilePath
     deriving (Eq, Show)
 
 configPathP :: Parser ConfigPath
@@ -61,7 +61,7 @@ diffCommand =
             progDesc "Diff CSV files"
   where
     file = argument str (metavar "FILE")
-    diffP = DiffCSV <$> file <*> file
+    diffP = DiffCSV <$> configPathP <*> file <*> file
 
 input :: Parser Command
 input =

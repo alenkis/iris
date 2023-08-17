@@ -2,6 +2,8 @@ module Process where
 
 import           Conduit              as CL
 import           Config               (Column (..), Config (..))
+import           Context              (Context (unContext), Context_ (config),
+                                       HasConfig (..))
 import           Control.Monad        (unless)
 import           Control.Monad.Reader (MonadReader, ReaderT, asks)
 import           Control.Monad.State  (MonadState (get, put), StateT,
@@ -26,21 +28,13 @@ class (Monad m) => Processor m where
     transform :: Text -> Text -> m ()
     diff :: Text -> Text -> m ()
 
-newtype Env = Env {envConfig :: Config}
-
-instance (MonadIO m, MonadUnliftIO m, MonadThrow m) => Processor (ReaderT Env m) where
+instance (MonadIO m, MonadUnliftIO m, MonadThrow m) => Processor (ReaderT Context m) where
     transform source destination = do
-        envConfig <- asks envConfig
-        doTransform envConfig source destination
+        config <- asks (config . unContext)
+        doTransform config source destination
     diff source destination = do
-        envConfig <- asks envConfig
-        doDiff envConfig source destination
-
-class HasConfig env where
-    getConfig :: env -> Config
-
-instance HasConfig Env where
-    getConfig = envConfig
+        config <- asks (config . unContext)
+        doDiff config source destination
 
 csvSettings :: Char -> CSVSettings
 csvSettings sep = defCSVSettings{csvSep = sep, csvQuoteChar = Nothing}
@@ -70,7 +64,7 @@ numberRows = do
             lift $ put (rowNum + 1)
             numberRows
 
-doTransform :: (MonadIO m, MonadUnliftIO m, MonadThrow m) => Config -> Text -> Text -> ReaderT Env m ()
+doTransform :: (MonadIO m, MonadUnliftIO m, MonadThrow m) => Config -> Text -> Text -> ReaderT Context m ()
 doTransform config sourcePath destinationPath =
     runResourceT $
         evalStateT (runConduit pipeline) 2 -- start at 2 because of headers
@@ -98,7 +92,7 @@ doTransform config sourcePath destinationPath =
             -- output
             .| sinkFile (T.unpack destinationPath)
 
-doDiff :: (MonadIO m, MonadUnliftIO m, MonadThrow m) => Config -> Text -> Text -> ReaderT Env m ()
+doDiff :: (MonadIO m, MonadUnliftIO m, MonadThrow m) => Config -> Text -> Text -> ReaderT Context m ()
 doDiff config fileOld fileNew =
     runResourceT $ runConduit pipeline
   where

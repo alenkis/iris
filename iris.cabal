@@ -70,6 +70,8 @@ library
         Paths_iris
         Meta
         Validation
+        Process
+        Context
     build-depends:
             base
           , toml-parser
@@ -83,6 +85,7 @@ library
           , bytestring
           , mtl
           , regex-tdfa
+          , sqlite-simple
 
 executable iris
     -- Import common warning flags.
@@ -100,6 +103,8 @@ executable iris
         Process
         Meta
         Validation
+        Context
+        Db
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -118,6 +123,7 @@ executable iris
                     , bytestring
                     , mtl
                     , regex-tdfa
+                    , sqlite-simple
 
     -- Directories containing source files.
     hs-source-dirs:   app, lib
@@ -152,6 +158,7 @@ test-suite spec
           , conduit
           , mtl
           , ordered-containers
+          , sqlite-simple
         
     other-modules:
         QuoteStr,
