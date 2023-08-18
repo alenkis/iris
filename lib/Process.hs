@@ -11,12 +11,13 @@ import           Control.Monad.State  (MonadState (get, put), StateT,
 import           Data.Bifunctor       (first)
 import           Data.CSV.Conduit
 import           Data.Either          (isRight, lefts)
-import           Data.List            (elemIndices, (\\))
+import           Data.List            (elemIndices)
 import qualified Data.Map.Ordered     as MO
 import           Data.Maybe           (fromMaybe, mapMaybe)
 import           Data.Text            (Text)
 import qualified Data.Text            as T
 import qualified Data.Text.IO         as TIO
+import           Db                   (doDiff)
 import           Validation           (validateField)
 
 type RowMap = OrderedMapRow Text
@@ -34,7 +35,7 @@ instance (MonadIO m, MonadUnliftIO m, MonadThrow m) => Processor (ReaderT Contex
         doTransform config source destination
     diff source destination = do
         config <- asks (config . unContext)
-        doDiff config source destination
+        doDiff config (T.unpack source) (T.unpack destination)
 
 csvSettings :: Char -> CSVSettings
 csvSettings sep = defCSVSettings{csvSep = sep, csvQuoteChar = Nothing}
@@ -91,18 +92,6 @@ doTransform config sourcePath destinationPath =
             .| (writeHeadersOrdered settings >> fromCSV settings)
             -- output
             .| sinkFile (T.unpack destinationPath)
-
-doDiff :: (MonadIO m, MonadUnliftIO m, MonadThrow m) => Config -> Text -> Text -> ReaderT Context m ()
-doDiff config fileOld fileNew =
-    runResourceT $ runConduit pipeline
-  where
-    settings = csvSettings (fromMaybe ',' $ jobSeparator config)
-    pipeline = undefined
-
-    diffRows :: ([String], [String]) -> [[String]]
-    diffRows (old, new)
-        | old == new = ["same" : old]
-        | otherwise = ["changed" : old] ++ ["added" : (new \\ old)] ++ ["removed" : (old \\ new)]
 
 filterValues :: (Monad m) => [Column] -> ConduitT RowMapIndexed RowMapIndexed m ()
 filterValues fields = do
