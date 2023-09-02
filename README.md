@@ -2,15 +2,18 @@
 
 `iris` is a command line tool for CSV validation and processing.
 
-_This project is in experimental phase and breaking changes should be expected_
+The main purpose of the project was to explore data streaming techniques in Haskell, and in this respect, it was a success. Haskell is a delightful language to work with, although there's some friction when it comes to building and distributing binaries (that's why you'll only find `aarch64-darwin` binary).
+
+I would not recommend using it in production.
+However, it's still a useful CLI tool for CSV processing, if your problems fit the features this tool provides. In my case, those were mostly data validation on a per-row basis, and column transformations.
 
 ## Features
 
-- [x] Constant memory processing (streams)
-- [x] Fast - ~100 Mbps
+- [x] Constant memory processing, suitable for large files
+- [x] Fast - ~100 Mbps on 2021 MacBook Pro M1
 - [x] Configuration based (TOML)
-- [x] Filter by column names
-- [x] Rename column names
+- [x] Filter columns by column names
+- [x] Rename columns
 - [x] Add validations
 - [x] Error reporting
 
