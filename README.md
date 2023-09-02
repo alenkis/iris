@@ -13,7 +13,6 @@ _This project is in experimental phase and breaking changes should be expected_
 - [x] Rename column names
 - [x] Add validations
 - [x] Error reporting
-- [ ] File diffing
 
 ## Installation
 
